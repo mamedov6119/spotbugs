@@ -1836,6 +1836,14 @@ factory pattern to create these objects.</p>
       ]]>
     </Details>
   </Detector>
+  <Detector class="edu.umd.cs.findbugs.detect.AvoidClientSideLocking">
+    <Details>
+        <![CDATA[
+            <p>Checks for potential issues related to client-side locking when using classes that do 
+            not explicitly define their locking strategy.</p>
+        ]]>
+    </Details>
+</Detector>
   <!--
   **********************************************************************
   BugPatterns
@@ -9243,6 +9251,24 @@ Using floating-point variables should not be used as loop counters, as they are 
       </p>]]>
     </Details>
   </BugPattern>
+  <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING">
+    <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
+    <LongDescription>Client-side locking may lead to unintended issues when using classes that do not commit to a specific locking strategy.
+    In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <Details>
+        <![CDATA[
+            <p>
+                This detector identifies instances where client-side locking is used with classes that do not explicitly define their locking strategy.
+                Client-side locking involves acquiring locks on objects without clear documentation or commitment from the class regarding its locking behavior.
+                This can lead to unintended consequences, such as deadlocks or inefficient resource utilization.
+            </p>
+            <p>
+                To address this issue, it is recommended to either use classes with well-defined locking strategies or to employ thread-safe alternatives
+                to ensure proper synchronization and avoid potential pitfalls associated with client-side locking.
+            </p>
+        ]]>
+    </Details>
+  </BugPattern>
   <!--
   **********************************************************************
    BugCodes
@@ -9404,4 +9430,5 @@ Using floating-point variables should not be used as loop counters, as they are 
   <BugCode abbrev="AA">Misuse of assertions for checking arguments of public methods</BugCode>
   <BugCode abbrev="PI">Do not reuse public identifiers from Java Standard Library</BugCode>
   <BugCode abbrev="ENV">Environment variable is used instead of the corresponding Java property</BugCode>
+  <BugCode abbrev="ACSL">Avoid client-side locking when using classes that do not commit to their locking strategy</BugCode>
 </MessageCollection>
