@@ -14,18 +14,21 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadClientSideLocking() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/PrintableIPAddressList.class");
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/PrintableIPAddressList.class",
+                "avoidClientSideLocking/DataUpdater.class", "avoidClientSideLocking/Book.class");
 
-        assertNumOfACSLBugs(2);
+        assertNumOfACSLBugs(3);
 
         assertACSLBug("фыв", "BadClientSideLockingBook");
         assertACSLBug("фыв", "PrintableIPAddressList");
+        assertACSLBug("фыв", "DataUpdater");
 
     }
 
     @Test
     void testGoodEndOfFileChecks() {
-        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class");
+        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/GoodClientSideLockingIP.class",
+                "avoidClientSideLocking/DataUpdaterr.class", "avoidClientSideLocking/Book.class");
 
         assertNumOfACSLBugs(0);
     }
