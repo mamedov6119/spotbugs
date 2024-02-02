@@ -5,10 +5,12 @@ import org.apache.bcel.classfile.JavaClass;
 
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
-import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import edu.umd.cs.findbugs.ba.XField;
+import edu.umd.cs.findbugs.OpcodeStack.Item;
+import edu.umd.cs.findbugs.bcel.OpcodeStackDetector;
 
-public class AvoidClientSideLocking extends BytecodeScanningDetector {
+
+public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     private final BugReporter bugReporter;
     private boolean isInsideSynchronizedBlock;
@@ -31,30 +33,32 @@ public class AvoidClientSideLocking extends BytecodeScanningDetector {
     public void sawOpcode(int seen) {
         if (seen == Const.MONITORENTER) {
             isInsideSynchronizedBlock = true;
-            currentLockField = getLockField();
+            if (stack.getStackDepth() > 0) {
+                Item top = stack.getStackItem(0);
+                XField field = top.getXField();
+                if (field != null) {
+                    currentLockField = field;
+                } 
+            }
         } else if (seen == Const.MONITOREXIT) {
-
+            isInsideSynchronizedBlock = false;
         } else if (seen == Const.PUTFIELD || seen == Const.PUTSTATIC) {
             if (isInsideSynchronizedBlock && currentLockField != null) {
-                // Violations and report bugs
                 checkAndReportViolation(currentLockField);
             }
         }
     }
 
-    private XField getLockField() {
-        // Logic to get the field related to the lock
-        return null;
-    }
 
     private void checkAndReportViolation(XField lockField) {
-        // Implement logic to check for violations and report bugs
-        // Compare lockField with the class's declared locking strategy
-        // Report a bug if the client-side locking is detected
-
-        bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", NORMAL_PRIORITY)
-                .addClassAndMethod(this)
-                .addString("Avoid client-side locking when using classes that do not commit to their locking strategy"));
+        // implement logic to check for violations and then report bugs
+        // compare lockField with the class's declared locking strategy
+        // report a bug if the client-side locking is detected
+        if (isInsideSynchronizedBlock && currentLockField != null) {
+            bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", NORMAL_PRIORITY)
+                    .addClassAndMethod(this)
+                    .addString("Avoid client-side locking when using classes that do not commit to their locking strategy"));
+        }
     }
 
 }
