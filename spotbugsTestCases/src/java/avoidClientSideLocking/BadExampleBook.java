@@ -1,7 +1,6 @@
 package avoidClientSideLocking;
 
 import java.util.Calendar;
-import avoidClientSideLocking.Book;
 
 public class BadExampleBook {
     // Client
@@ -21,7 +20,6 @@ public class BadExampleBook {
 
     public void renew() {
         Calendar localCalendar = Calendar.getInstance();
-        int i = 0;
         synchronized (localCalendar) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");

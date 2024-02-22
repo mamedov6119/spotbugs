@@ -52,27 +52,20 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         if (obj.isSynchronized()) {
             String methodSignature = currentJavaClass.getClassName() + "." + obj.getSignature();
             System.out.println("Synchronized method: " + methodSignature + " in class " + currentJavaClass.getClassName());
-            lvt = getMethod().getLocalVariableTable();
             synchronizedMethodsMap.put(methodSignature, true);
         }
+        lvt = getMethod().getLocalVariableTable();
     }
 
     @Override
     public void sawOpcode(int seen) {
-        if (lvt != null) {
-            for (int i = 0; i < lvt.getLength(); i++) {
-                if (lvt != null) {
-                    lv = LVTHelper.getLocalVariableAtPC(lvt, i, seen);
-                    System.out.println("Local variable table: " + lv);
-                }
-            }
-        }
         if (seen == Const.MONITORENTER) {
             isInsideSynchronizedBlock = true;
             if (stack.getStackDepth() > 0) {
                 Item top = stack.getStackItem(0);
                 XField field = top.getXField();
                 XMethod methodC = top.getReturnValueOf();
+
                 if (field != null) {
                     currentLockField = field;
                     String className = field.getClassName();
@@ -84,14 +77,17 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     if (!classHasSynchronizedMethods(className)) {
                         checkAndReportViolationFromConstructor(methodC);
                     }
-                }
-                if (lvt != null) {
+                } else if (lvt != null) {
+                    String className = "";
                     for (LocalVariable localVariable : lvt) {
                         if (localVariable.getStartPC() <= getPC() && localVariable.getStartPC() + localVariable.getLength() > getPC()) {
-                            System.out.println("Local variable: " + localVariable.getName());
-                        }
+                            className = localVariable.getClass().getName();
+                            // lv = localVariable;
+                            System.out.println("Local variable: " + localVariable.getName() + " " + className);
+                        } // HOW TO GET THE SPECIFICLY FROM SYNCHRONIZED(______) VARIABLE????
                     }
                 }
+
             } else if (seen == Const.MONITOREXIT) {
                 isInsideSynchronizedBlock = false;
             } else if (seen == Const.PUTFIELD || seen == Const.PUTSTATIC) {
@@ -139,4 +135,20 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     .addString("Avoid client-side locking when using classes that do not commit to their locking strategy"));
         }
     }
+
+    private void reportLocalVariableViolation(LocalVariable localVariable) {
+        if (isInsideSynchronizedBlock && currentLockField != null) {
+            // Extract necessary information from the local variable
+            String variableName = localVariable.getName();
+            // String variableType = localVariable.getSignature(); // variable type
+            int lineNumber = localVariable.getStartPC(); // get the start PC or line number of the variable
+
+            // Construct a BugInstance to report the violation
+            bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", NORMAL_PRIORITY)
+                    .addClass(currentJavaClass).addField(currentLockField)
+                    .addString("Avoid using local variables as locks, found: " + variableName)
+                    .addSourceLine(this, lineNumber));
+        }
+    }
+
 }
