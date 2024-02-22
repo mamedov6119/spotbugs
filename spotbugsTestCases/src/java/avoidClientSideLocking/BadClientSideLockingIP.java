@@ -22,7 +22,7 @@ public class BadClientSideLockingIP {
 }
 
 class PrintableIPAddressList extends BadClientSideLockingIP {
-    public void фыв(InetAddress address) {
+    public void addAndPrintIPAddresses(InetAddress address) {
         // Error: If the underlying locking policy of BadClientSideLockingIP changes in the future, this client-side locking may not align with the actual locking strategy, leading to potential issues
         synchronized (getList()) { 
             addIPAddress(address);

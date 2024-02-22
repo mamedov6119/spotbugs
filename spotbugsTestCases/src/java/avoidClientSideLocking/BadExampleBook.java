@@ -3,11 +3,11 @@ package avoidClientSideLocking;
 import java.util.Calendar;
 import avoidClientSideLocking.Book;
 
-public class BadClientSideLockingBook {
+public class BadExampleBook {
     // Client
     private Book book;
 
-    BadClientSideLockingBook(Book book) {
+    BadExampleBook(Book book) {
         this.book = book;
     }
 
@@ -20,9 +20,9 @@ public class BadClientSideLockingBook {
     }
 
     public void renew() {
-        // Error: it may lead to issues if the underlying locking policy of the Book
-        // class changes in the future
-        synchronized (book) {
+        Calendar localCalendar = Calendar.getInstance();
+        int i = 0;
+        synchronized (localCalendar) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
             } else {
@@ -30,5 +30,4 @@ public class BadClientSideLockingBook {
             }
         }
     }
-
 }
