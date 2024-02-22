@@ -19,7 +19,7 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         //         "avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/BadClientSideLockingMap.class",
         //         "avoidClientSideLocking/BadClientSideLockingExample.class", "avoidClientSideLocking/BadExampleBook.class");
 
-        performAnalysis("avoidClientSideLocking/BadExampleBook.class");
+        performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
 
         // assertACSLBug("renew", "BadClientSideLockingBook");
         // assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
