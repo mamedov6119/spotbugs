@@ -14,16 +14,19 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadClientSideLocking() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/PrintableIPAddressList.class",
-                "avoidClientSideLocking/DataUpdater.class", "avoidClientSideLocking/Book.class",
-                "avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/BadClientSideLockingMap.class", "avoidClientSideLocking/BadClientSideLockingExample.class");
+        // performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/PrintableIPAddressList.class",
+        //         "avoidClientSideLocking/DataUpdater.class", "avoidClientSideLocking/Book.class",
+        //         "avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/BadClientSideLockingMap.class",
+        //         "avoidClientSideLocking/BadClientSideLockingExample.class", "avoidClientSideLocking/BadExampleBook.class");
 
+        performAnalysis("avoidClientSideLocking/BadExampleBook.class");
 
-        assertACSLBug("фыв", "BadClientSideLockingBook"); 
-        // assertACSLBug("фыв", "PrintableIPAddressList");
+        // assertACSLBug("renew", "BadClientSideLockingBook");
+        // assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
         // assertACSLBug("фыв", "DataUpdater");
-        assertACSLBug("someMethod", "BadClientSideLockingExample");
-        assertNumOfACSLBugs(2);
+        assertACSLBug("renew", "BadExampleBook");
+        // assertACSLBug("someMethod", "BadClientSideLockingExample");
+        assertNumOfACSLBugs(1);
     }
 
     @Test
