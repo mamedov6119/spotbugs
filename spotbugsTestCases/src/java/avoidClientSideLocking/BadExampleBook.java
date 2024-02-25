@@ -4,9 +4,9 @@ import java.util.Calendar;
 
 public class BadExampleBook {
     // Client
-    private Book book;
+    private Bok book;
 
-    BadExampleBook(Book book) {
+    BadExampleBook(Bok book) {
         this.book = book;
     }
 
