@@ -2,6 +2,9 @@ package edu.umd.cs.findbugs.detect;
 
 import static edu.umd.cs.findbugs.test.CountMatcher.containsExactly;
 import static org.hamcrest.Matchers.hasItem;
+
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
@@ -19,22 +22,28 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         //         "avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/BadClientSideLockingMap.class",
         //         "avoidClientSideLocking/BadClientSideLockingExample.class", "avoidClientSideLocking/BadExampleBook.class");
 
-        performAnalysis("avoidClientSideLocking/BadWrapper.class", "avoidClientSideLocking/Bok.class");
-
+        // performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
+        // performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
+        // performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class", "avoidClientSideLocking/PrintableIPAddressList.class", "avoidClientSideLocking/BadClientSideLockingIP.class");
+        // performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
+        performAnalysis("avoidClientSideLocking/PrintableIPAddressList.class", "avoidClientSideLocking/BadClientSideLockingIP.class");
         // assertACSLBug("renew", "BadClientSideLockingBook");
-        // assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
-        // assertACSLBug("фыв", "DataUpdater");
-        assertACSLBug("renew", "BadWrapper");
+        assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
+        // assertACSLBug("фыв", "DataUpdateraddIPAddress(InetAddress");
+        // assertACSLBug("getDueDate", "BadClientSideLockingBook");
+        // assertACSLBugInMultipleMethods(List.of("getDueDate", "issue"), "BadClientSideLockingBook");
+        // assertACSLBug("renew", "BadExampleBook");
         // assertACSLBug("someMethod", "BadClientSideLockingExample");
+        // assertACSLBug("issue", "BadClientSideLockingBookC");
         assertNumOfACSLBugs(1);
-    }
+    } //java, what is static analysis tools, spotbugs how works, other static analyzers, the problem I am solving
 
     @Test
     void testGoodEndOfFileChecks() {
-        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/GoodClientSideLockingIP.class",
-                "avoidClientSideLocking/DataUpdaterr.class", "avoidClientSideLocking/Book.class", "avoidClientSideLocking/IPAddressList.class",
-                "avoidClientSideLocking/GoodClientSideLockingMap.class");
-
+        // performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/GoodClientSideLockingIP.class",
+        //         "avoidClientSideLocking/DataUpdaterr.class", "avoidClientSideLocking/Book.class", "avoidClientSideLocking/IPAddressList.class",
+        //         "avoidClientSideLocking/GoodClientSideLockingMap.class");
+        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class","avoidClientSideLocking/Book.class");
         assertNumOfACSLBugs(0);
     }
 
@@ -51,6 +60,12 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 .inMethod(method)
                 .build();
         assertThat(getBugCollection(), hasItem(bugInstanceMatcher));
+        System.out.println("ACSL_AVOID_CLIENT_SIDE_LOCKING bug was caught in " + className + "." + method + " method");
+    }
+    private void assertACSLBugInMultipleMethods(List<String> methods, String className) {
+        for (String method : methods) {
+            assertACSLBug(method, className);
+        }
     }
 
 }

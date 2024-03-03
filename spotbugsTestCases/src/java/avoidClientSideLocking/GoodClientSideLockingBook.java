@@ -1,13 +1,13 @@
 package avoidClientSideLocking;
 
 import java.util.Calendar;
-import avoidClientSideLocking.Bok;
+import avoidClientSideLocking.Book;
 
 public final class GoodClientSideLockingBook {
-    private Bok book;
+    private Book book;
     private final Object lock = new Object();
 
-    GoodClientSideLockingBook(Bok book) {
+    GoodClientSideLockingBook(Book book) {
         this.book = book;
     }
 

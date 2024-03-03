@@ -2,11 +2,11 @@ package avoidClientSideLocking;
 
 import java.util.Calendar;
 
-public class BadWrapper {
+public class BadClientSideLockingBook {
     // Client
-    private Bok book;
+    private Book book;
 
-    BadWrapper(Bok book) {
+    BadClientSideLockingBook(Book book) {
         this.book = book;
     }
 
@@ -29,8 +29,8 @@ public class BadWrapper {
         }
     }
 
-    // public void hartoshhka(int days) {
-    //     book.issue(days);
-    // }
+    public void hartoshhka(int days) {
+        System.out.println("Hartoshka");
+    }
 
 }
