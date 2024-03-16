@@ -10,17 +10,19 @@ public class BadExampleBook {
         this.book = book;
     }
 
-    public void issue(int days) {
+    public synchronized void issue(int days) {
         book.issue(days);
     }
 
-    public Calendar getDueDate() {
+    public synchronized Calendar getDueDate() {
         return book.getDueDate();
     }
 
     public void renew() {
         Calendar localCalendar = Calendar.getInstance();
-        synchronized (localCalendar) {
+        Calendar AUE = Calendar.getInstance();
+        Book baba = new Book("asdasdas");
+        synchronized (AUE) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
             } else {
