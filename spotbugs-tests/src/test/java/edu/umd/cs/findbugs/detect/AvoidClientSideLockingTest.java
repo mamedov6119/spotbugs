@@ -26,14 +26,16 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         // performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class", "avoidClientSideLocking/PrintableIPAddressList.class", "avoidClientSideLocking/BadClientSideLockingIP.class");
         // performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
 
-        performAnalysis("avoidClientSideLocking/PrintableIPAddressList.class", "avoidClientSideLocking/BadClientSideLockingIP.class");
-        // performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
+        // performAnalysis("avoidClientSideLocking/PrintableIPAddressList.class", "avoidClientSideLocking/BadClientSideLockingIP.class");
+        // performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
+        performAnalysis("avoidClientSideLocking/SpotBugsG.class");
 
-        assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
+        // assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList");
         // assertACSLBugInMultipleMethods(List.of("getDueDate", "issue"), "BadClientSideLockingBook");
         // assertACSLBug("someMethod", "BadClientSideLockingExample");
         // assertACSLBug("issue", "BadClientSideLockingBookC");
         // assertACSLBug("renew", "BadExampleBook");
+        assertACSLBug("getMnemonic", "SpotBugsG");
 
         assertNumOfACSLBugs(1);
     } //java, what is static analysis tools, spotbugs how works, other static analyzers, the problem I am solving
@@ -43,7 +45,8 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         // performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/GoodClientSideLockingIP.class",
         //         "avoidClientSideLocking/DataUpdaterr.class", "avoidClientSideLocking/Book.class", "avoidClientSideLocking/IPAddressList.class",
         //         "avoidClientSideLocking/GoodClientSideLockingMap.class");
-        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class","avoidClientSideLocking/GoodClientSideLockingIP.class","avoidClientSideLocking/IPAddressList.class");
+        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
+                "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
         assertNumOfACSLBugs(0);
     }
 
