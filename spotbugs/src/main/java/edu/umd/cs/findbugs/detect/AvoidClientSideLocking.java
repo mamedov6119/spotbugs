@@ -1,7 +1,6 @@
 package edu.umd.cs.findbugs.detect;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,13 +15,11 @@ import org.apache.bcel.classfile.Method;
 
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
-import edu.umd.cs.findbugs.LocalVariableAnnotation;
 import edu.umd.cs.findbugs.OpcodeStack;
 import edu.umd.cs.findbugs.ba.ClassMember;
 import edu.umd.cs.findbugs.ba.XField;
 import edu.umd.cs.findbugs.ba.XMethod;
 import org.apache.bcel.classfile.LocalVariable;
-import org.apache.bcel.classfile.LocalVariableTable;
 import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.bcel.OpcodeStackDetector;
 
@@ -30,9 +27,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.VarInsnNode;
 
 public class AvoidClientSideLocking extends OpcodeStackDetector {
 
@@ -64,21 +59,21 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (obj.isSynchronized() || methodContainsSynchronizedBlock(getClassName(), obj.getName())) {
                 methodsUsingLock.add(getFullyQualifiedMethodName(obj));
                 methodSynchronizationStatus.put(getFullyQualifiedMethodName(obj), true);
-                System.out.println("Method using locaak: " + getFullyQualifiedMethodName(obj) + " "
-                        + methodSynchronizationStatus.get(
-                                getFullyQualifiedMethodName(obj))
-                        + " " + getClassName() + " " + obj.getName() + " " + methodContainsSynchronizedBlock(
-                                getClassName(), obj.getName()));
+                // System.out.println("Method using locaak: " + getFullyQualifiedMethodName(obj) + " "
+                //         + methodSynchronizationStatus.get(
+                //                 getFullyQualifiedMethodName(obj))
+                //         + " " + getClassName() + " " + obj.getName() + " " + methodContainsSynchronizedBlock(
+                //                 getClassName(), obj.getName()));
                 localVariableTable = obj.getLocalVariableTable();
             }
-            System.out.println("Method: " + getFullyQualifiedMethodName(obj) + " isSynchronized: "
-                    + obj.isSynchronized() + " Contains synch block "
-                    + methodContainsSynchronizedBlock(getClassName(), obj.getName()));
-            System.out.println("Method using locaakaas: " + getFullyQualifiedMethodName(obj) + " "
-                    + methodSynchronizationStatus.get(
-                            getFullyQualifiedMethodName(obj))
-                    + " " + getClassName() + " " + obj.getName() + " " + methodContainsSynchronizedBlock(
-                            getClassName(), obj.getName()));
+            // System.out.println("Method: " + getFullyQualifiedMethodName(obj) + " isSynchronized: "
+            //         + obj.isSynchronized() + " Contains synch block "
+            //         + methodContainsSynchronizedBlock(getClassName(), obj.getName()));
+            // System.out.println("Method using locaakaas: " + getFullyQualifiedMethodName(obj) + " "
+            //         + methodSynchronizationStatus.get(
+            //                 getFullyQualifiedMethodName(obj))
+            //         + " " + getClassName() + " " + obj.getName() + " " + methodContainsSynchronizedBlock(
+            //                 getClassName(), obj.getName()));
         }
         super.visitMethod(obj);
     }
@@ -119,15 +114,15 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 // System.out.println(methodC + " gggg");
                 if (field != null) {
                     currentLockField = field;
-                    System.out.println("Fielda: "+ field.getClassName());
+                    // System.out.println("Fielda: " + field.getClassName());
                     if (isLockObject(top)) {
                         methodsUsingLock.add(getFullyQualifiedMethodName(getMethod()));
-                        System.out.println("ewewewew " + getFullyQualifiedMethodName(getMethod()) + " " + methodSynchronizationStatus.get(
-                            getFullyQualifiedMethodName(getMethod())));
+                        // System.out.println("ewewewew " + getFullyQualifiedMethodName(getMethod()) + " " + methodSynchronizationStatus.get(
+                        //     getFullyQualifiedMethodName(getMethod())));
                     }
-                    System.out.println("Method usings: " + getFullyQualifiedMethodName(getMethod()) + " " + methodSynchronizationStatus.get(
-                    getFullyQualifiedMethodName(getMethod())));
-                    System.out.println("Class MNName: " + getClassNameFromFieldDescriptor(field));
+                    // System.out.println("Method usings: " + getFullyQualifiedMethodName(getMethod()) + " " + methodSynchronizationStatus.get(
+                    // getFullyQualifiedMethodName(getMethod())));
+                    // System.out.println("Class MNName: " + getClassNameFromFieldDescriptor(field));
                     if (isInsideSynchronizedBlock && currentLockField == null) {
                         reportViolation(methodsUsingLock);
                     }
@@ -135,14 +130,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 }
                 if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isMethodInherited(getMethod()) && isMethodInherited(
                         methodC)) {
-                    System.out.println("Method using return value:" + getFullyQualifiedMethodName(getMethod()) + " ss " + getFullyQualifiedMethodName(
-                            methodC) + " ss " + getMethod());
+                    // System.out.println("Method using return value:" + getFullyQualifiedMethodName(getMethod()) + " ss " + getFullyQualifiedMethodName(
+                    //         methodC) + " ss " + getMethod());
                     if (isInsideSynchronizedBlock && currentLockField == null) {
                         System.out.println(isMethodInherited(methodC) + " inherited " + methodC);
                         if (isMethodInherited(methodC)) {
                             inheritedMethods.add(getFullyQualifiedMethodName(methodC));
                         }
-                        System.out.println(isMethodInherited(getMethod()) + " inheriteds " + getMethod());
+                        // System.out.println(isMethodInherited(getMethod()) + " inheriteds " + getMethod());
                         // methodsUsingLock.add(getFullyQualifiedMethodName(getMethod()));
                         methodSynchronizationStatus.put(getFullyQualifiedMethodName(getMethod()), false);
                         // reportViolation(methodsUsingLock);
@@ -151,7 +146,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                             bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
                                     .addClassAndMethod(this)
                                     .addString("Not all methods using the lock are synchronized"));
-                            System.out.println("inside m " + this + " " + methodSynchronizationStatus.get(getFullyQualifiedMethodName(getMethod())));
+                            // System.out.println("inside m " + this + " " + methodSynchronizationStatus.get(getFullyQualifiedMethodName(getMethod())));
                             returnValue = true;
                         }
                     }
@@ -164,56 +159,57 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     //             .addString("Local variable used as lock"));
                     //     }
                     // }
-                    System.out.println("Local variable: is used as local lock: " + getLockVariableFromStack(stack));
-                    currentLocalVariable = getLockVariableFromStack(stack);   
+                    // System.out.println("Local variable: is used as local lock: " + getLockVariableFromStack(stack));
+                    currentLocalVariable = getLockVariableFromStack(stack);
                 }
-                
+
             }
             // print methodUsingLock
             // for (String method : methodsUsingLock) {
             //     System.out.println("Method using lockaaa: " + methodSynchronizationStatus.get(method) + " " + method);
             // }
-            for (String method : inheritedMethods) {
-                System.out.println("Method using locka inher: " + methodSynchronizationStatus.get(method) + " " + method);
-            }
+            // for (String method : inheritedMethods) {
+            //     System.out.println("Method using locka inher: " + methodSynchronizationStatus.get(method) + " " + method);
+            // }
 
         } else if (seen == Const.MONITOREXIT) {
             isInsideSynchronizedBlock = false;
         } else if (seen == Const.PUTFIELD || seen == Const.GETFIELD) {
-            System.out.println("Curr lock f: " + currentLockField + " " + getFullyQualifiedMethodName(getMethod()) );
-                if (!Const.CONSTRUCTOR_NAME.equals(getMethod().getName()) && !methodsUsingLock.contains(getFullyQualifiedMethodName(getMethod())) && !returnValue) {
-                    methodsUsingLock.add(getFullyQualifiedMethodName(getMethod()));
-                    System.out.println("Method using locks: " + getFullyQualifiedMethodName(getMethod()));
-                    reportViolation(methodsUsingLock);
-                }
+            // System.out.println("Curr lock f: " + currentLockField + " " + getFullyQualifiedMethodName(getMethod()) );
+            if (!Const.CONSTRUCTOR_NAME.equals(getMethod().getName()) && !methodsUsingLock.contains(getFullyQualifiedMethodName(getMethod()))
+                    && !returnValue) {
+                methodsUsingLock.add(getFullyQualifiedMethodName(getMethod()));
+                // System.out.println("Method using locks: " + getFullyQualifiedMethodName(getMethod()));
+                reportViolation(methodsUsingLock);
+            }
         } else if (seen == Const.ALOAD) {
-            System.out.println("ALOAD: " + getFullyQualifiedMethodName(getMethod()) + " var used as locksas " + currentLocalVariable);
+            // System.out.println("ALOAD: " + getFullyQualifiedMethodName(getMethod()) + " var used as locksas " + currentLocalVariable);
             bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
-                                    .addClassAndMethod(this)
-                                    .addString("Local variable used as lock"));
+                    .addClassAndMethod(this)
+                    .addString("Local variable used as lock"));
         }
-}
+    }
 
-private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
-    if (stack.getStackDepth() > 0) {
-        Item topItem = stack.getStackItem(0);
-        if (topItem != null && topItem.isInitialParameter()) {
-            return null; // This means the object is a method parameter, not a local variable.
-        }
+    private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
+        if (stack.getStackDepth() > 0) {
+            Item topItem = stack.getStackItem(0);
+            if (topItem != null && topItem.isInitialParameter()) {
+                return null; // This means the object is a method parameter, not a local variable.
+            }
 
-        int localVarIndex = topItem.getRegisterNumber(); // Get the local variable index.
+            int localVarIndex = topItem.getRegisterNumber(); // Get the local variable index.
 
-        if (localVariableTable != null && localVarIndex >= 0) {
-            // Iterate over the local variable table to find the matching variable.
-            for (LocalVariable lv : localVariableTable.getLocalVariableTable()) {
-                if (lv.getIndex() == localVarIndex) {
-                    return lv; // This is the local variable used as a lock.
+            if (localVariableTable != null && localVarIndex >= 0) {
+                // Iterate over the local variable table to find the matching variable.
+                for (LocalVariable lv : localVariableTable.getLocalVariableTable()) {
+                    if (lv.getIndex() == localVarIndex) {
+                        return lv; // This is the local variable used as a lock.
+                    }
                 }
             }
         }
+        return null;
     }
-    return null;
-}
 
 
     private static boolean isInterestingField(ClassMember classMember) {
@@ -256,7 +252,7 @@ private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
                     }
                 }
             } catch (ClassNotFoundException e) {
-                // bugReporter.reportMissingClass(e);
+                bugReporter.reportMissingClass(e);
             }
         } else if (method instanceof XMethod) {
             try {
@@ -283,7 +279,7 @@ private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
                     }
                 }
             } catch (ClassNotFoundException e) {
-                // bugReporter.reportMissingClass(e);
+                bugReporter.reportMissingClass(e);
             }
         }
         return false;
@@ -307,40 +303,29 @@ private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         return false;
     }
 
-    private String getClassNameFromFieldDescriptor(XField field) {
-        String fieldDescriptor = field.getFieldDescriptor().toString();
-        int lastIndex = fieldDescriptor.lastIndexOf('.');
-        if (lastIndex != -1) {
-            String className = fieldDescriptor.substring(lastIndex + 1);
-            System.out.println("Class name: " + className);
-            return className;
-        }
-        return null;
-    }
-
     public void reportViolation(HashSet<String> methodsUsingLock) {
-        for (String method : methodsUsingLock) {
-            System.out.println("Method using lockas: " + methodSynchronizationStatus.get(method) + " " + method);
-        }
-        System.out.println("+++++++++++++++++");
+        // for (String method : methodsUsingLock) {
+        //     System.out.println("Method using lockas: " + methodSynchronizationStatus.get(method) + " " + method);
+        // }
+        // System.out.println("+++++++++++++++++");
         for (String methodSignature : methodsUsingLock) {
-            System.out.println(
-                    "Method using lock: " + methodSignature + " " + methodSynchronizationStatus.get(methodSignature));
+            // System.out.println(
+            //         "Method using lock: " + methodSignature + " " + methodSynchronizationStatus.get(methodSignature));
             Boolean isSynchronized = methodSynchronizationStatus.get(methodSignature);
-            System.out.println("issynchrr " + isSynchronized + " " + methodSignature);
+            // System.out.println("issynchrr " + isSynchronized + " " + methodSignature);
             if (isSynchronized == null || !isSynchronized.booleanValue()) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
                         .addClass(this).addMethod(this.getXMethod())
                         .addString("Not all methods using the lock are synchronized"));
-                System.out.println(
-                        "asdasd " + this.getXMethod() + " " + methodSynchronizationStatus.get(methodSignature));
+                // System.out.println(
+                //         "asdasd " + this.getXMethod() + " " + methodSynchronizationStatus.get(methodSignature));
             }
 
         }
-        for (String method : methodsUsingLock) {
-            // System.out.println("Method using locke: " +
-            // methodSynchronizationStatus.get(method) + " " + method);
-        }
+        // for (String method : methodsUsingLock) {
+        //     // System.out.println("Method using locke: " +
+        //     // methodSynchronizationStatus.get(method) + " " + method);
+        // }
     }
 
     public void reportViolationInherited(HashSet<String> methodsUsingLock) {
@@ -356,10 +341,10 @@ private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
             }
 
         }
-        for (String method : methodsUsingLock) {
-            // System.out.println("Method using locker: " +
-            // methodSynchronizationStatus.get(method) + " " + method);
-        }
+        // for (String method : methodsUsingLock) {
+        //     // System.out.println("Method using locker: " +
+        //     // methodSynchronizationStatus.get(method) + " " + method);
+        // }
     }
 
     private String getFullyQualifiedMethodName(Object method) {
@@ -370,5 +355,4 @@ private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         }
         return null;
     }
-
 }
