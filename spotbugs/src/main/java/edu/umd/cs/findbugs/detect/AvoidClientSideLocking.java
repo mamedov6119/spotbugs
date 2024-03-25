@@ -108,7 +108,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isMethodInherited(getMethod()) && isMethodInherited(
                         methodC)) {
                     if (isInsideSynchronizedBlock && currentLockField == null) {
-                        System.out.println(isMethodInherited(methodC) + " inherited " + methodC);
                         if (isMethodInherited(methodC)) {
                             inheritedMethods.add(getFullyQualifiedMethodName(methodC));
                         }
