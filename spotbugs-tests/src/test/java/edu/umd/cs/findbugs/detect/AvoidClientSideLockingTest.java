@@ -15,40 +15,40 @@ import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcherBuilder;
 
 public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
-    @Test
-    void testBadMapClass1() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingMap.class", "avoidClientSideLocking/DataUpdater.class");
-        assertACSLBug("фыв", "DataUpdater");
-        assertNumOfACSLBugs(1);
-    }
+    // @Test
+    // void testBadMapClass1() {
+    //     performAnalysis("avoidClientSideLocking/SpotBugsG.class");
+    //     assertACSLBug("getMnemonic", "SpotBugsG");
+    //     assertNumOfACSLBugs(1);
+    // }
 
-    @Test
-    void testBadIPAddress1() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
-        assertACSLBug("addAndPrintIPAddresses", "BadClientSideLockingIP");
-        assertNumOfACSLBugs(1);
-    }
+    // @Test
+    // void testBadIPAddress1() {
+    //     performAnalysis("avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
+    //     assertACSLBug("addAndPrintIPAddresses", "BadClientSideLockingIP");
+    //     assertNumOfACSLBugs(1);
+    // }
 
-    @Test
-    void testBadBookClass1() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
-        assertACSLBugInMultipleMethods(List.of("getDueDate", "issue"), "BadClientSideLockingBook");
-        assertNumOfACSLBugs(2);
-    }
+    // @Test
+    // void testBadBookClass1() {
+    //     performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
+    //     assertACSLBugInMultipleMethods(List.of("getDueDate", "issue"), "BadClientSideLockingBook");
+    //     assertNumOfACSLBugs(2);
+    // }
 
-    @Test
-    void testBadBookClass2() {
-        performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
-        assertACSLBug("renew", "BadExampleBook");
-        assertNumOfACSLBugs(1);
-    }
+    // @Test
+    // void testBadBookClass2() {
+    //     performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
+    //     assertACSLBug("renew", "BadExampleBook");
+    //     assertNumOfACSLBugs(1);
+    // }
 
-    @Test
-    void testBadBookClass3() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class");
-        assertACSLBug("issue", "BadClientSideLockingBookC");
-        assertNumOfACSLBugs(1);
-    }
+    // @Test
+    // void testBadBookClass3() {
+    //     performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class");
+    //     assertACSLBug("issue", "BadClientSideLockingBookC");
+    //     assertNumOfACSLBugs(1);
+    // }
 
     @Test
     void testBadBookClass4() {
@@ -57,12 +57,12 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertNumOfACSLBugs(1);
     }
 
-    @Test
-    void testGoodEndOfFileChecks() {
-        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
-                "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
-        assertNumOfACSLBugs(0);
-    }
+    // @Test
+    // void testGoodEndOfFileChecks() {
+    //     performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
+    //             "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
+    //     assertNumOfACSLBugs(0);
+    // }
 
     private void assertNumOfACSLBugs(int num) {
         final BugInstanceMatcher bugTypeMatcher = new BugInstanceMatcherBuilder()

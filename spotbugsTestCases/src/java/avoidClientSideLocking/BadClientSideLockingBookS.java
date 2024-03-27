@@ -6,9 +6,11 @@ import avoidClientSideLocking.Book;
 public class BadClientSideLockingBookS {
     // Client
     private Book book;
+    private int days;
 
-    BadClientSideLockingBookS(Book book) {
+    BadClientSideLockingBookS(Book book, int days) {
         this.book = book;
+        this.days = days;
     }
 
     public synchronized void issue(int days) {
@@ -25,6 +27,7 @@ public class BadClientSideLockingBookS {
                 throw new IllegalStateException("Book overdue");
             } else {
                 book.issue(14); // Issue book for 14 days
+                days = 14;
             }
         }
     }
