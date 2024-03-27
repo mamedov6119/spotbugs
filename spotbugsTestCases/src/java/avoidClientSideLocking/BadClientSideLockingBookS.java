@@ -31,4 +31,8 @@ public class BadClientSideLockingBookS {
             }
         }
     }
+
+    public void smth() {
+        System.out.println("smth");
+    }
 }
