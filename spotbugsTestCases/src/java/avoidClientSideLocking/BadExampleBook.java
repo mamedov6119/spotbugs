@@ -19,9 +19,7 @@ public class BadExampleBook {
     }
 
     public void renew() {
-        Calendar localCalendar = Calendar.getInstance();
         Calendar AUE = Calendar.getInstance();
-        Book baba = new Book("asdasdas");
         synchronized (AUE) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
@@ -29,5 +27,16 @@ public class BadExampleBook {
                 book.issue(14); // Issue book for 14 days
             }
         }
+    }
+
+    public void testing() {
+        Calendar aaaa = Calendar.getInstance();
+        synchronized (aaaa) {
+            book.issue(14);
+        }
+    }
+
+    public void justLocal() {
+        Book bb = new Book("badBook");
     }
 }

@@ -30,4 +30,13 @@ class PrintableIPAddressList extends BadClientSideLockingIP {
             // ...
         }
     }
+
+    public void test(InetAddress address) {
+        // Error: If the underlying locking policy of BadClientSideLockingIP changes in the future, this client-side locking may not align with the actual locking strategy, leading to potential issues
+        synchronized (getList()) { 
+            addIPAddress(address);
+            InetAddress[] ia = (InetAddress[]) getList().toArray(new InetAddress[0]);
+            // ...
+        }
+    }
 }
