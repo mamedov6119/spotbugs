@@ -20,6 +20,7 @@ package edu.umd.cs.findbugs;
 
 import java.util.Map;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import edu.umd.cs.findbugs.classfile.Global;
 
 /**
@@ -40,6 +41,7 @@ public class AnalysisLocal<T> {
         return (Map<AnalysisLocal<T>, T>) m;
     }
 
+    @SuppressFBWarnings("ACSL_AVOID_CLIENT_SIDE_LOCKING")
     public T get() {
         Map<AnalysisLocal<T>, T> m = getMap();
 

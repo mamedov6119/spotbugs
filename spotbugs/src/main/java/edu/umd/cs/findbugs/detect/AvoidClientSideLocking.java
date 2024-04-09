@@ -48,33 +48,26 @@ import org.objectweb.asm.tree.MethodNode;
 
 public class AvoidClientSideLocking extends OpcodeStackDetector {
 
-
-
     private final BugReporter bugReporter;
-    private boolean isInsideSynchronizedBlock;
-    private HashSet<String> methodsUsingLock;
     private HashSet<Method> methodsToReport;
-    private HashSet<XMethod> inheritedMethods;
     private Map<String, Boolean> methodSynchronizationStatus;
     private XField currentLockField;
-    private LocalVariable currentLocalVariable;
     private LocalVariableTable localVariableTable;
     private String nameCurrentLockField;
-    private final Set<XField> interestingFields = new HashSet<>();
-    private HashSet<JavaClass> classesNotToReport = new HashSet<>();
-    private HashSet<Method> methodsLocalVarReport = new HashSet<>();
+    private final Set<XField> interestingFields;
+    private HashSet<JavaClass> classesNotToReport;
+    private HashSet<Method> methodsLocalVarReport;
 
     public AvoidClientSideLocking(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
-        this.isInsideSynchronizedBlock = false;
         this.currentLockField = null;
-        this.methodsUsingLock = new HashSet<>();
         this.methodsToReport = new HashSet<>();
         this.methodSynchronizationStatus = new HashMap<>();
-        this.inheritedMethods = new HashSet<>();
-        this.currentLocalVariable = null;
         this.localVariableTable = null;
         this.nameCurrentLockField = null;
+        this.interestingFields = new HashSet<>();
+        this.classesNotToReport = new HashSet<>();
+        this.methodsLocalVarReport = new HashSet<>();
     }
 
     @Override
@@ -83,7 +76,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         for (Method obj : methods) {
             if (!Const.CONSTRUCTOR_NAME.equals(obj.getName())) {
                 if (obj.isSynchronized() || methodContainsSynchronizedBlock(javaClass, obj)) {
-                    methodsUsingLock.add(obj.getName());
                     methodSynchronizationStatus.put(obj.getName(), true);
                     localVariableTable = obj.getLocalVariableTable();
                 } else if (!Const.CONSTRUCTOR_NAME.equals(obj.getName())) {
@@ -151,14 +143,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 }
             }
         }
-        if (seen == Const.ALOAD) {
-
-        }
         if (seen == Const.MONITORENTER) {
-            isInsideSynchronizedBlock = true;
             if (localVariableTable != null) {
                 if (getLockVariableFromStack(stack) != null) {
-                    currentLocalVariable = getLockVariableFromStack(stack);
                     methodsLocalVarReport.add(getMethod());
                 }
             }
@@ -167,15 +154,12 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 XMethod methodC = top.getReturnValueOf();
                 if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isMethodInherited(getMethod()) && isMethodInherited(
                         methodC)) {
-                    if (isInsideSynchronizedBlock && currentLockField == null) {
+                    if (currentLockField == null) {
                         methodsToReport.add(getMethod());
-                        inheritedMethods.add(methodC);
                     }
                 }
 
             }
-        } else if (seen == Const.MONITOREXIT) {
-            this.isInsideSynchronizedBlock = false;
         }
     }
 
@@ -183,7 +167,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     public void visitAfter(JavaClass jc) {
         if (currentLockField != null) {
             for (Method method : methodsToReport) {
-                // System.out.println("Method to report: " + method + " in class: " + jc.getClassName());
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
                         .addClass(jc).addMethod(jc, method)
                         .addString("All methods must be synchronized when using the field as a lock object in a synchronized block"));
@@ -191,7 +174,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
         if (!classesNotToReport.contains(jc)) {
             for (Method method : methodsToReport) {
-                // System.out.println("Method to report: " + method + " in class: " + jc.getClassName());
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
                         .addClass(jc).addMethod(jc, method)
                         .addString("Do not use a return value as a lock object in a synchronized block"));
@@ -199,17 +181,15 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
         if (!methodsLocalVarReport.isEmpty()) {
             for (Method method : methodsLocalVarReport) {
-                // System.out.println("Method to report: " + method + " in class: " + jc.getClassName());
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING", HIGH_PRIORITY)
                         .addClass(jc).addMethod(jc, method)
                         .addString("Local variable used as lock"));
             }
         }
+
         methodsToReport.clear();
         methodsLocalVarReport.clear();
-        methodsUsingLock.clear();
         methodSynchronizationStatus.clear();
-        inheritedMethods.clear();
         interestingFields.clear();
         classesNotToReport.clear();
         super.visitAfter(jc);
@@ -222,9 +202,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (topItem != null && topItem.isInitialParameter()) {
                 return null;
             }
-
             int localVarIndex = topItem.getRegisterNumber();
-
             if (localVariableTable != null && localVarIndex >= 0) {
                 for (LocalVariable lv : localVariableTable.getLocalVariableTable()) {
                     if (lv.getIndex() == localVarIndex) {
@@ -254,7 +232,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private void collectInterestingFields(ClassContext classContext, Method method) throws CFGBuilderException {
         CFG cfg = classContext.getCFG(method);
         ConstantPoolGen cpg = classContext.getConstantPoolGen();
-
         for (Location location : cfg.orderedLocations()) {
             InstructionHandle handle = location.getHandle();
             Instruction instruction = handle.getInstruction();
@@ -276,18 +253,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 String className = ((Method) method).getClass().getName();
                 JavaClass declaringClass = Repository.lookupClass(className);
                 JavaClass currentClass = getClassContext().getJavaClass();
-
                 if (declaringClass.equals(currentClass)) {
                     return false;
                 }
-
                 while (currentClass != null && !currentClass.equals(declaringClass)) {
                     currentClass = currentClass.getSuperClass();
-
                     if (currentClass == null) {
                         break;
                     }
-
                     for (Method superClassMethod : currentClass.getMethods()) {
                         if (((Method) method).getName().equals(superClassMethod.getName()) &&
                                 ((Method) method).getSignature().equals(superClassMethod.getSignature())) {
@@ -303,18 +276,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 String className = ((XMethod) method).getClassName();
                 JavaClass declaringClass = Repository.lookupClass(className);
                 JavaClass currentClass = getClassContext().getJavaClass();
-
                 if (declaringClass.equals(currentClass)) {
                     return false;
                 }
-
                 while (currentClass != null && !currentClass.equals(declaringClass)) {
                     currentClass = currentClass.getSuperClass();
-
                     if (currentClass == null) {
                         break;
                     }
-
                     for (Method superClassMethod : currentClass.getMethods()) {
                         if (((XMethod) method).getName().equals(superClassMethod.getName()) &&
                                 ((XMethod) method).getSignature().equals(superClassMethod.getSignature())) {
