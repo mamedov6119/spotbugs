@@ -16,10 +16,17 @@ import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcherBuilder;
 public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
-    void testBadIPAddress2() {
+    void testBadIPAddress1() {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingIP.class", "avoidClientSideLocking/PrintableIPAddressList.class");
         assertACSLBugInMultipleMethods(List.of("addAndPrintIPAddresses", "test"), "PrintableIPAddressList");
         assertNumOfACSLBugs(2);
+    }
+
+    @Test
+    void testBadIPAddress2() {
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingIP2.class", "avoidClientSideLocking/PrintableIPAddressList2.class");
+        assertACSLBug("addAndPrintIPAddresses", "PrintableIPAddressList2");
+        assertNumOfACSLBugs(1);
     }
 
     @Test
@@ -51,12 +58,21 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void testBadBookClass5() {
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingExample1.class", "avoidClientSideLocking/Book.class");
+        assertACSLBugInMultipleMethods(List.of("renew", "testing", "testing2"), "BadClientSideLockingExample1");
+        assertNumOfACSLBugs(3);
+    }
+
+    @Test
     void testGoodLocking() {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
                 "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
         assertNumOfACSLBugs(0);
     }
+    
 
+    
     private void assertNumOfACSLBugs(int num) {
         final BugInstanceMatcher bugTypeMatcher = new BugInstanceMatcherBuilder()
                 .bugType("ACSL_AVOID_CLIENT_SIDE_LOCKING").build();
