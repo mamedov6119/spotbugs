@@ -70,9 +70,9 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
         assertNumOfACSLBugs(0);
     }
-    
 
-    
+
+
     private void assertNumOfACSLBugs(int num) {
         final BugInstanceMatcher bugTypeMatcher = new BugInstanceMatcherBuilder()
                 .bugType("ACSL_AVOID_CLIENT_SIDE_LOCKING").build();
