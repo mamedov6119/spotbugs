@@ -13,7 +13,7 @@ import edu.umd.cs.findbugs.AbstractIntegrationTest;
 import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcher;
 import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcherBuilder;
 
-public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
+class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadIPAddress1() {
@@ -86,7 +86,6 @@ public class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 .inMethod(method)
                 .build();
         assertThat(getBugCollection(), hasItem(bugInstanceMatcher));
-        System.out.println("ACSL_AVOID_CLIENT_SIDE_LOCKING bug was caught in " + className + "." + method + " method");
     }
 
     private void assertACSLBugInMultipleMethods(List<String> methods, String className) {

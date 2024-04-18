@@ -9279,18 +9279,25 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>Client-side locking may lead to unintended issues when using classes that do not commit to a specific locking strategy.
-    In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
     <Details>
         <![CDATA[
             <p>
-                This detector identifies instances where client-side locking is used with classes that do not explicitly define their locking strategy.
-                Client-side locking involves acquiring locks on objects without clear documentation or commitment from the class regarding its locking behavior.
-                This can lead to unintended consequences, such as deadlocks or inefficient resource utilization.
+                This issue occurs when client-side locking is applied to objects of classes that have not explicitly documented their locking behavior.
+                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
+                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
             </p>
             <p>
-                To address this issue, it is recommended to either use classes with well-defined locking strategies or to employ thread-safe alternatives
-                to ensure proper synchronization and avoid potential pitfalls associated with client-side locking.
+                The SEI CERT Oracle Secure Coding Standard for Java provides guidance under rule LCK11-J, which advises against relying on client-side locks with classes that are ambiguous about their internal synchronization mechanisms. 
+                Following this standard can help developers avoid common pitfalls in concurrency control.
+            </p>
+            <p>
+            To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
+            Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
+            This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+            </p>
+            <p>
+            See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
             </p>
         ]]>
     </Details>
