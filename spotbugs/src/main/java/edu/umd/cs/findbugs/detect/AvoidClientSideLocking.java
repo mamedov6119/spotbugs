@@ -83,7 +83,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         Method[] methods = javaClass.getMethods();
         for (Method obj : methods) {
             try {
-                collectInterestingFields(getClassContext(), obj);
+                collectInterestingFieldsAndClassesNotToReport(getClassContext(), obj);
             } catch (CFGBuilderException e) {
                 AnalysisContext.logError("CFGBuilderException: " + e.getMessage());
             }
@@ -222,7 +222,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         && classMember.getSignature().endsWith(")V"));
     }
 
-    private void collectInterestingFields(ClassContext classContext, Method method) throws CFGBuilderException {
+    private void collectInterestingFieldsAndClassesNotToReport(ClassContext classContext, Method method) throws CFGBuilderException {
         CFG cfg = classContext.getCFG(method);
         ConstantPoolGen cpg = classContext.getConstantPoolGen();
         for (Location location : cfg.orderedLocations()) {
