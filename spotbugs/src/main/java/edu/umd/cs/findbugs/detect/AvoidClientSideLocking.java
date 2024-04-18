@@ -119,8 +119,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (stack.getStackDepth() > 0) {
                 OpcodeStack.Item top = stack.getStackItem(0);
                 XMethod methodC = top.getReturnValueOf();
-                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isXMethodInherited(getXMethod()) && isXMethodInherited(
-                        methodC) && currentLockField == null) {
+                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isXMethodInherited(getXMethod()) && isXMethodInherited(methodC) && currentLockField == null) {
                         methodsToReport.add(getMethod());
                 }
 
