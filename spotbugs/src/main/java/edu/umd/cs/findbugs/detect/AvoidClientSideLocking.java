@@ -82,7 +82,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             try {
                 collectInterestingFieldsAndClassesNotToReport(getClassContext(), obj);
             } catch (CFGBuilderException e) {
-                AnalysisContext.logError("CFGBuilderException: " + e.getMessage());
+                AnalysisContext.logError("CFGBuilderException: " + e.getMessage(), e);
             }
             if (!Const.CONSTRUCTOR_NAME.equals(obj.getName())) {
                 if (obj.isSynchronized()) {
