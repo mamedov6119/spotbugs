@@ -9277,13 +9277,14 @@ Using floating-point variables should not be used as loop counters, as they are 
       </p>]]>
     </Details>
   </BugPattern>
-  <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING">
+  <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
     <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
     <Details>
         <![CDATA[
             <p>
-                This issue occurs when client-side locking is applied to objects of classes that have not explicitly documented their locking behavior.
+                It is a good practice to avoid synchronization on fields of classes that do not explicitly document their locking strategy. 
+                For example, if a filed is an instance of a class that does not commit to its locking strategy.
                 Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
                 The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
             </p>
@@ -9292,9 +9293,59 @@ Using floating-point variables should not be used as loop counters, as they are 
                 Following this standard can help developers avoid common pitfalls in concurrency control.
             </p>
             <p>
-            To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
-            Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
-            This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
+              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
+              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+            </p>
+            <p>
+            See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
+            </p>
+        ]]>
+    </Details>
+  </BugPattern>
+  <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE">
+    <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
+    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <Details>
+        <![CDATA[
+            <p>
+                It is a good practice to avoid synchronization on return values of methods of classes that do not explicitly document their locking strategy.
+                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
+                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
+            </p>
+            <p>
+                The SEI CERT Oracle Secure Coding Standard for Java provides guidance under rule LCK11-J, which advises against relying on client-side locks with classes that are ambiguous about their internal synchronization mechanisms. 
+                Following this standard can help developers avoid common pitfalls in concurrency control.
+            </p>
+            <p>
+              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
+              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
+              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+            </p>
+            <p>
+            See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
+            </p>
+        ]]>
+    </Details>
+  </BugPattern>
+  <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE">
+    <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
+    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <Details>
+        <![CDATA[
+            <p>
+                It is a good practice to avoid synchronization on local variables that are instantiated in methods using synchronization.
+                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
+                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
+            </p>
+            <p>
+                The SEI CERT Oracle Secure Coding Standard for Java provides guidance under rule LCK11-J, which advises against relying on client-side locks with classes that are ambiguous about their internal synchronization mechanisms. 
+                Following this standard can help developers avoid common pitfalls in concurrency control.
+            </p>
+            <p>
+              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
+              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
+              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
             </p>
             <p>
             See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
