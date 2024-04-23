@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.bcel.Const;
-import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.LocalVariableTable;
 import org.apache.bcel.classfile.Method;
@@ -42,6 +41,8 @@ import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.OpcodeStack;
 import edu.umd.cs.findbugs.ba.ClassMember;
+import edu.umd.cs.findbugs.ba.Hierarchy;
+import edu.umd.cs.findbugs.ba.JavaClassAndMethod;
 import edu.umd.cs.findbugs.ba.XField;
 import edu.umd.cs.findbugs.ba.XMethod;
 import org.apache.bcel.classfile.LocalVariable;
@@ -53,8 +54,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     private final BugReporter bugReporter;
     private final Set<Method> methodsToReport;
-    private final Set<String> methodSynchronizationStatus2;
-    private final Set<XField> interestingFields;
+    private final Set<String> unsynchronizedMethods;
+    private final Set<XField> concurrentOrSynchronizedFields;
     private String currentLockFieldName;
     private LocalVariableTable localVariableTable;
     private final HashSet<JavaClass> classesNotToReport;
@@ -66,13 +67,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         this.methodsToReport = new HashSet<>();
         this.localVariableTable = null;
         this.currentLockFieldName = null;
-        this.interestingFields = new HashSet<>();
+        this.concurrentOrSynchronizedFields = new HashSet<>();
         this.classesNotToReport = new HashSet<>();
         this.methodsLocalVarReport = new HashSet<>();
-        this.methodSynchronizationStatus2 = new HashSet<>();
+        this.unsynchronizedMethods = new HashSet<>();
     }
-
-
 
     @Override
     public void visit(JavaClass jc) {
@@ -80,7 +79,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         Method[] methods = jc.getMethods();
         for (Method obj : methods) {
             try {
-                collectInterestingFieldsAndClassesNotToReport(getClassContext(), obj);
+                collectConcurrentOrSynchronizedFieldsAndClassesNotToReport(getClassContext(), obj);
             } catch (CFGBuilderException e) {
                 AnalysisContext.logError("CFGBuilderException: " + e.getMessage(), e);
             }
@@ -88,7 +87,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (obj.isSynchronized()) {
                     localVariableTable = obj.getLocalVariableTable();
                 } else {
-                    methodSynchronizationStatus2.add(obj.getName());
+                    unsynchronizedMethods.add(obj.getName());
                     doVisitMethod(obj);
                 }
             }
@@ -107,8 +106,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     if (stack.getStackItem(0).getXField() != null) {
                         currentLockFieldName = stack.getStackItem(0).getXField().getName();
                     }
-                    if (!methodSynchronizationStatus2.isEmpty() && methodSynchronizationStatus2.contains(getMethodName())) {
-                        methodSynchronizationStatus2.remove(getMethodName());
+                    if (!unsynchronizedMethods.isEmpty() && unsynchronizedMethods.contains(getMethodName())) {
+                        unsynchronizedMethods.remove(getMethodName());
                     }
                     localVariableTable = getMethod().getLocalVariableTable();
                 }
@@ -123,10 +122,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (!Const.CONSTRUCTOR_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null) {
                     String fieldName = getXFieldOperand().getName();
-                    if (currentLockFieldName != null && fieldName.equals(currentLockFieldName)) {
-                        if (methodSynchronizationStatus2.contains(getMethodName())) {
+                    if (currentLockFieldName != null && fieldName.equals(currentLockFieldName) && unsynchronizedMethods.contains(getMethodName())) {
                             methodsToReport.add(getMethod());
-                        }
                     }
                 }
             }
@@ -138,8 +135,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (stack.getStackDepth() > 0) {
                 OpcodeStack.Item top = stack.getStackItem(0);
                 XMethod methodC = top.getReturnValueOf();
-                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !isXMethodInherited(getXMethod()) && isXMethodInherited(
-                        methodC)) {
+                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && overridesSuperclassMethod(getThisClass(), methodC)) {
                     methodsToReport.add(getMethod());
                 }
             }
@@ -175,8 +171,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
         methodsToReport.clear();
         methodsLocalVarReport.clear();
-        methodSynchronizationStatus2.clear();
-        interestingFields.clear();
+        unsynchronizedMethods.clear();
+        concurrentOrSynchronizedFields.clear();
         classesNotToReport.clear();
         super.visitAfter(jc);
     }
@@ -201,8 +197,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         return null;
     }
 
-
-    private static boolean isInterestingField(ClassMember classMember) {
+    // Reference the original method.
+    private static boolean isConcurrentOrSynchronizedField(ClassMember classMember) {
         if (classMember == null) {
             return false;
         }
@@ -216,7 +212,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         && classMember.getSignature().endsWith(")V"));
     }
 
-    private void collectInterestingFieldsAndClassesNotToReport(ClassContext classContext, Method method) throws CFGBuilderException {
+    private void collectConcurrentOrSynchronizedFieldsAndClassesNotToReport(ClassContext classContext, Method method) throws CFGBuilderException {
         CFG cfg = classContext.getCFG(method);
         ConstantPoolGen cpg = classContext.getConstantPoolGen();
         for (Location location : cfg.orderedLocations()) {
@@ -226,38 +222,41 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (instruction instanceof PUTFIELD) {
                 OpcodeStack stack = OpcodeStackScanner.getStackAt(classContext.getJavaClass(), method, handle.getPosition());
                 OpcodeStack.Item stackItem = stack.getStackItem(0);
-                if (isInterestingField(stackItem.getReturnValueOf())) {
-                    interestingFields.add(XFactory.createXField((FieldInstruction) instruction, cpg));
+                if (isConcurrentOrSynchronizedField(stackItem.getReturnValueOf())) {
+                    concurrentOrSynchronizedFields.add(XFactory.createXField((FieldInstruction) instruction, cpg));
                     classesNotToReport.add(classContext.getJavaClass());
                 }
             }
         }
     }
-
-    private boolean isXMethodInherited(XMethod xmethod) {
-        try {
-            String className = xmethod.getClassName();
-            JavaClass declaringClass = Repository.lookupClass(className);
-            JavaClass currentClass = getClassContext().getJavaClass();
-            if (declaringClass.equals(currentClass)) {
+        // reference original method
+        private boolean overridesSuperclassMethod(JavaClass javaClass, XMethod method) {
+            if (method.isStatic()) {
                 return false;
             }
-            while (currentClass != null && !currentClass.equals(declaringClass)) {
-                currentClass = currentClass.getSuperClass();
-                if (currentClass == null) {
-                    break;
-                }
-                for (Method superClassMethod : currentClass.getMethods()) {
-                    if (xmethod.getName().equals(superClassMethod.getName()) &&
-                            xmethod.getSignature().equals(superClassMethod.getSignature())) {
+    
+            try {
+                JavaClass[] superclassList = javaClass.getSuperClasses();
+                if (superclassList != null) {
+                    JavaClassAndMethod match = Hierarchy.findMethod(superclassList, method.getName(), method.getSignature(), 
+                            Hierarchy.INSTANCE_METHOD);
+                    if (match != null) {
                         return true;
                     }
                 }
+    
+                JavaClass[] interfaceList = javaClass.getAllInterfaces();
+                if (interfaceList != null) {
+                    JavaClassAndMethod match = Hierarchy.findMethod(interfaceList, method.getName(), method.getSignature(),
+                            Hierarchy.INSTANCE_METHOD);
+                    if (match != null) {
+                        return true;
+                    }
+                }
+    
+                return false;
+            } catch (ClassNotFoundException e) {
+                return true;
             }
-        } catch (ClassNotFoundException e) {
-            bugReporter.reportMissingClass(e);
         }
-        return false;
-    }
-
 }
