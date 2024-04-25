@@ -42,17 +42,11 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertNumOfACSLBugs(ACSL_FIELD, 2);
     }
 
-    // @Test
-    // void testBadBookClass2() {
-    //     performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
-    //     assertACSLBugInMultipleMethods(List.of("renew", "testing"), "BadExampleBook", ACSL_LOCAL);
-    //     assertNumOfACSLBugs(ACSL_LOCAL, 2);
-    // }
-
     @Test
-    void testGoodBookClass2() {
-        performAnalysis("avoidClientSideLocking/Repository.class","avoidClientSideLocking/RepositoryDateFormat.class");
-        assertNumOfACSLBugs(NO_BUG, 0);
+    void testBadBookClass2() {
+        performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
+        assertACSLBugInMultipleMethods(List.of("renew", "testing"), "BadExampleBook", ACSL_LOCAL);
+        assertNumOfACSLBugs(ACSL_LOCAL, 2);
     }
 
     @Test
@@ -80,6 +74,13 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     void testGoodLocking() {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
                 "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class");
+        assertNumOfACSLBugs(NO_BUG, 0);
+    }
+
+    @Test
+    void testGoodLocking2() {
+        performAnalysis("avoidClientSideLocking/Repository$1.class",
+                "avoidClientSideLocking/Repository$RepositoryDateFormat.class");
         assertNumOfACSLBugs(NO_BUG, 0);
     }
 
