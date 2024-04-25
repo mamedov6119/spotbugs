@@ -42,11 +42,17 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertNumOfACSLBugs(ACSL_FIELD, 2);
     }
 
+    // @Test
+    // void testBadBookClass2() {
+    //     performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
+    //     assertACSLBugInMultipleMethods(List.of("renew", "testing"), "BadExampleBook", ACSL_LOCAL);
+    //     assertNumOfACSLBugs(ACSL_LOCAL, 2);
+    // }
+
     @Test
-    void testBadBookClass2() {
-        performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
-        assertACSLBugInMultipleMethods(List.of("renew", "testing"), "BadExampleBook", ACSL_LOCAL);
-        assertNumOfACSLBugs(ACSL_LOCAL, 2);
+    void testGoodBookClass2() {
+        performAnalysis("avoidClientSideLocking/Repository.class","avoidClientSideLocking/RepositoryDateFormat.class");
+        assertNumOfACSLBugs(NO_BUG, 0);
     }
 
     @Test

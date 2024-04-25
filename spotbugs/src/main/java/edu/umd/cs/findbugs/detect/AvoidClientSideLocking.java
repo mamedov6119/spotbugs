@@ -123,13 +123,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (getXFieldOperand() != null) {
                     String fieldName = getXFieldOperand().getName();
                     if (currentLockFieldName != null && fieldName.equals(currentLockFieldName) && unsynchronizedMethods.contains(getMethodName())) {
-                            methodsToReport.add(getMethod());
+                        methodsToReport.add(getMethod());
                     }
                 }
             }
         }
         if (seen == Const.MONITORENTER) {
             if (localVariableTable != null && getLockVariableFromStack(stack) != null) {
+                System.out.println("Adding a local var method: " + getMethod());
                 methodsLocalVarReport.add(getMethod());
             }
             if (stack.getStackDepth() > 0) {
@@ -161,6 +162,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
         if (!methodsLocalVarReport.isEmpty()) {
             for (Method method : methodsLocalVarReport) {
+                System.out.println("Reported local var: " + method);
+
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
                         .addClass(jc).addMethod(jc, method)
                         .addString("Local variable used as lock"));
@@ -182,6 +185,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         if (stack.getStackDepth() > 0) {
             Item topItem = stack.getStackItem(0);
+            System.out.println("Top item: " + isConcurrentOrSynchronizedField(topItem.getReturnValueOf()));
             if (topItem != null && topItem.isInitialParameter()) {
                 return null;
             }
@@ -189,6 +193,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (localVariableTable != null && localVarIndex >= 0) {
                 for (LocalVariable lv : localVariableTable.getLocalVariableTable()) {
                     if (lv.getIndex() == localVarIndex) {
+                        System.out.println("Local var: " + lv.toString() + " Item: " + topItem.toString());
+
                         return lv;
                     }
                 }
@@ -229,34 +235,35 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             }
         }
     }
-        // reference original method
-        private boolean overridesSuperclassMethod(JavaClass javaClass, XMethod method) {
-            if (method.isStatic()) {
-                return false;
-            }
-    
-            try {
-                JavaClass[] superclassList = javaClass.getSuperClasses();
-                if (superclassList != null) {
-                    JavaClassAndMethod match = Hierarchy.findMethod(superclassList, method.getName(), method.getSignature(), 
-                            Hierarchy.INSTANCE_METHOD);
-                    if (match != null) {
-                        return true;
-                    }
-                }
-    
-                JavaClass[] interfaceList = javaClass.getAllInterfaces();
-                if (interfaceList != null) {
-                    JavaClassAndMethod match = Hierarchy.findMethod(interfaceList, method.getName(), method.getSignature(),
-                            Hierarchy.INSTANCE_METHOD);
-                    if (match != null) {
-                        return true;
-                    }
-                }
-    
-                return false;
-            } catch (ClassNotFoundException e) {
-                return true;
-            }
+
+    // reference original method
+    private boolean overridesSuperclassMethod(JavaClass javaClass, XMethod method) {
+        if (method.isStatic()) {
+            return false;
         }
+
+        try {
+            JavaClass[] superclassList = javaClass.getSuperClasses();
+            if (superclassList != null) {
+                JavaClassAndMethod match = Hierarchy.findMethod(superclassList, method.getName(), method.getSignature(),
+                        Hierarchy.INSTANCE_METHOD);
+                if (match != null) {
+                    return true;
+                }
+            }
+
+            JavaClass[] interfaceList = javaClass.getAllInterfaces();
+            if (interfaceList != null) {
+                JavaClassAndMethod match = Hierarchy.findMethod(interfaceList, method.getName(), method.getSignature(),
+                        Hierarchy.INSTANCE_METHOD);
+                if (match != null) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (ClassNotFoundException e) {
+            return true;
+        }
+    }
 }

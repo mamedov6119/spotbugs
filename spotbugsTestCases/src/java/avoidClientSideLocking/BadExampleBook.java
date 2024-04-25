@@ -2,6 +2,7 @@ package avoidClientSideLocking;
 
 import java.util.Calendar;
 
+
 public class BadExampleBook {
     // Client
     private Book book;
