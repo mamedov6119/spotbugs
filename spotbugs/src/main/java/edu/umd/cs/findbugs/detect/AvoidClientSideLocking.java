@@ -28,6 +28,8 @@ import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
 import org.apache.bcel.generic.PUTFIELD;
+import org.apache.bcel.util.SyntheticRepository;
+
 import edu.umd.cs.findbugs.ba.AnalysisContext;
 import edu.umd.cs.findbugs.ba.CFG;
 import edu.umd.cs.findbugs.ba.CFGBuilderException;
@@ -48,6 +50,7 @@ import edu.umd.cs.findbugs.ba.XMethod;
 import org.apache.bcel.classfile.LocalVariable;
 import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.bcel.OpcodeStackDetector;
+import edu.umd.cs.findbugs.util.ClassName;
 
 
 public class AvoidClientSideLocking extends OpcodeStackDetector {
@@ -60,7 +63,10 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private LocalVariableTable localVariableTable;
     private final HashSet<JavaClass> classesNotToReport;
     private final HashSet<Method> methodsLocalVarReport;
+    private final HashSet<JavaClass> classesToCheck;
     private boolean isFirstVisit;
+    private static org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
+    
 
     public AvoidClientSideLocking(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
@@ -71,12 +77,21 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         this.classesNotToReport = new HashSet<>();
         this.methodsLocalVarReport = new HashSet<>();
         this.unsynchronizedMethods = new HashSet<>();
+        this.classesToCheck = new HashSet<>();
     }
 
     @Override
     public void visit(JavaClass jc) {
         isFirstVisit = true;
         Method[] methods = jc.getMethods();
+        if (!classesToCheck.isEmpty() && classesToCheck.contains(jc)) {
+            System.out.println("Class to check: " + jc);
+            for (Method method : methods) {
+                if (method.isSynchronized()) {
+                    System.out.println("Method to check: " + method);
+                }
+            }
+        }
         for (Method obj : methods) {
             try {
                 collectConcurrentOrSynchronizedFieldsAndClassesNotToReport(getClassContext(), obj);
@@ -95,8 +110,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
         isFirstVisit = false;
         super.visit(jc);
-
     }
+
+    
 
     @Override
     public void sawOpcode(int seen) {
@@ -130,7 +146,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
         if (seen == Const.MONITORENTER) {
             if (localVariableTable != null && getLockVariableFromStack(stack) != null) {
-                System.out.println("Adding a local var method: " + getMethod());
+                        try {
+                            repository.loadClass(ClassName.fromFieldSignatureToDottedClassName(getLockVariableFromStack(stack).getSignature()));
+                        } catch (ClassNotFoundException e) {
+                            AnalysisContext.logError("Could not load a class: " + e.getMessage(), e);
+                        }
+                        System.out.println("Local var class: " + repository.findClass(ClassName.fromFieldSignatureToDottedClassName(getLockVariableFromStack(stack).getSignature())));
+                        JavaClass localVarClass = repository.findClass(ClassName.fromFieldSignatureToDottedClassName(getLockVariableFromStack(stack).getSignature()));
+                        classesToCheck.add(localVarClass);
                 methodsLocalVarReport.add(getMethod());
             }
             if (stack.getStackDepth() > 0) {
@@ -145,6 +168,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     @Override
     public void visitAfter(JavaClass jc) {
+        
         if (currentLockFieldName != null) {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
@@ -160,6 +184,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         .addString("Do not use a return value as a lock object in a synchronized block"));
             }
         }
+
+        //if fields class in the same package report.
         if (!methodsLocalVarReport.isEmpty()) {
             for (Method method : methodsLocalVarReport) {
                 System.out.println("Reported local var: " + method);
@@ -185,7 +211,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         if (stack.getStackDepth() > 0) {
             Item topItem = stack.getStackItem(0);
-            System.out.println("Top item: " + isConcurrentOrSynchronizedField(topItem.getReturnValueOf()));
+            System.out.println("Top item: " + isConcurrentOrSynchronizedField(topItem.getReturnValueOf()) + " " + topItem.getReturnValueOf());
             if (topItem != null && topItem.isInitialParameter()) {
                 return null;
             }
@@ -193,8 +219,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (localVariableTable != null && localVarIndex >= 0) {
                 for (LocalVariable lv : localVariableTable.getLocalVariableTable()) {
                     if (lv.getIndex() == localVarIndex) {
-                        System.out.println("Local var: " + lv.toString() + " Item: " + topItem.toString());
-
+                        
+                        
                         return lv;
                     }
                 }
@@ -251,7 +277,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     return true;
                 }
             }
-
             JavaClass[] interfaceList = javaClass.getAllInterfaces();
             if (interfaceList != null) {
                 JavaClassAndMethod match = Hierarchy.findMethod(interfaceList, method.getName(), method.getSignature(),
@@ -260,7 +285,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     return true;
                 }
             }
-
             return false;
         } catch (ClassNotFoundException e) {
             return true;
