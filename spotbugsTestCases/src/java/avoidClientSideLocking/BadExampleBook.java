@@ -20,7 +20,7 @@ public class BadExampleBook {
     }
 
     public void renew() {
-        Calendar AUE = Calendar.getInstance();
+        SynchObj AUE = new SynchObj();
         synchronized (AUE) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
@@ -31,7 +31,7 @@ public class BadExampleBook {
     }
 
     public void testing() {
-        Calendar aaaa = Calendar.getInstance();
+        SynchObj aaaa = new SynchObj();
         synchronized (aaaa) {
             book.issue(14);
         }
