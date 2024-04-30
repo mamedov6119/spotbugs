@@ -65,7 +65,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private final HashSet<JavaClass> classesToCheck;
     private boolean isFirstVisit;
     private static org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
-    private static String currentPackageName;
+    private String currentPackageName;
 
     public AvoidClientSideLocking(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
