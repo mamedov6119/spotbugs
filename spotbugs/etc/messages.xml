@@ -9279,7 +9279,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <LongDescription>In class {1} the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
     <Details>
         <![CDATA[
             <p>
@@ -9305,7 +9305,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <LongDescription>In class {1} the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
     <Details>
         <![CDATA[
             <p>
@@ -9330,11 +9330,11 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1}, the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
+    <LongDescription>In class {1} the method {2} utilizes client-side locking, which can result in problems like deadlocks or inefficient resource usage.</LongDescription>
     <Details>
         <![CDATA[
             <p>
-                It is a good practice to avoid synchronization on local variables that are instantiated in methods using synchronization.
+                It is a good practice to avoid synchronization on local variables that are instantiated in methods using synchronization if the implementation of the local variable's class is unknown.
                 Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
                 The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
             </p>

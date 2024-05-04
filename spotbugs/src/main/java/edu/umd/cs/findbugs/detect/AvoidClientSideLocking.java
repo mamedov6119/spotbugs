@@ -60,9 +60,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private final Set<XField> concurrentOrSynchronizedFields;
     private String currentLockFieldName;
     private LocalVariableTable localVariableTable;
-    private final HashSet<JavaClass> classesNotToReport;
-    private final HashSet<Method> methodsLocalVarReport;
-    private final HashSet<JavaClass> classesToCheck;
+    private final Set<JavaClass> classesNotToReport;
+    private final Set<Method> methodsLocalVarReport;
+    private final Set<JavaClass> classesToCheck;
     private boolean isFirstVisit;
     private static org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
     private String currentPackageName;

@@ -1332,7 +1332,7 @@
           <BugPattern abbrev="SING" type="SING_SINGLETON_HAS_NONPRIVATE_CONSTRUCTOR" category="CORRECTNESS" />
           <BugPattern abbrev="SING" type="SING_SINGLETON_IMPLEMENTS_SERIALIZABLE" category="CORRECTNESS" />
           <BugPattern abbrev="SING" type="SING_SINGLETON_GETTER_NOT_SYNCHRONIZED" category="CORRECTNESS" />
-          <BugPattern abbrev="ENV" type="ENV_USE_PROPERTY_INSTEAD_OF_ENV" category="BAD_PRACTICE" />          
+          <BugPattern abbrev="ENV" type="ENV_USE_PROPERTY_INSTEAD_OF_ENV" category="BAD_PRACTICE" />
           <BugPattern abbrev="ACSL" type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD" category="BAD_PRACTICE"/>
           <BugPattern abbrev="ACSL" type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE" category="BAD_PRACTICE"/>
           <BugPattern abbrev="ACSL" type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE" category="BAD_PRACTICE"/>
