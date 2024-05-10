@@ -40,7 +40,6 @@ public class AnalysisLocal<T> {
         return (Map<AnalysisLocal<T>, T>) m;
     }
 
-    // @SuppressFBWarnings("ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE")
     public T get() {
         Map<AnalysisLocal<T>, T> m = getMap();
 

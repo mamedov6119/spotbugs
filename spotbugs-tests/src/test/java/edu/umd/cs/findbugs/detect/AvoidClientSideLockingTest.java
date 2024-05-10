@@ -134,26 +134,4 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         }
     }
 
-    private void assertACSLBugInMultipleMethods(List<String> methods, String className, String bugType) {
-        switch (bugType) {
-        case ACSL_FIELD:
-            for (String method : methods) {
-                assertFieldBug(method, className);
-            }
-            break;
-        case ACSL_RETURN:
-            for (String method : methods) {
-                assertReturnValueBug(method, className);
-            }
-            break;
-        case ACSL_LOCAL:
-            for (String method : methods) {
-                assertLocalVariableBug(method, className);
-            }
-            break;
-        default:
-            break;
-        }
-    }
-
 }

@@ -126,7 +126,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     XField xfield = getXFieldOperand();
                     if (xfield.getName().equals(currentLockField.getName())
                             && unsynchronizedMethods.contains(getMethod())) {
-                        System.out.println("Method return: " + getMethod());
                         methodsToReport.add(getMethod());
                     }
                 }
@@ -227,7 +226,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         return null;
     }
 
-    // Reference the original method.
+    // Reference to the original method. Link: https://gitlab.inf.elte.hu/java-static-analysis/spotbugs/-/merge_requests/20/diffs#66a21fadeee4760e4e500b0a7becbbce65e3af18
     private static boolean isConcurrentOrSynchronizedField(ClassMember classMember) {
         if (classMember == null) {
             return false;
@@ -260,7 +259,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
     }
 
-    // reference original method
+    // Reference to the original method. Link: https://github.com/spotbugs/spotbugs/blob/master/spotbugs/src/main/java/edu/umd/cs/findbugs/model/ClassFeatureSet.java#L125
     private boolean overridesSuperclassMethod(JavaClass javaClass, XMethod method) {
         if (method.isStatic()) {
             return false;
