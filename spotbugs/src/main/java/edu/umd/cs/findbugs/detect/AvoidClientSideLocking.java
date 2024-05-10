@@ -20,6 +20,8 @@ package edu.umd.cs.findbugs.detect;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 
 import org.apache.bcel.Const;
@@ -29,10 +31,13 @@ import org.apache.bcel.classfile.LocalVariableTable;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.generic.Instruction;
 import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.MONITORENTER;
+import org.apache.bcel.generic.MONITOREXIT;
 import org.apache.bcel.generic.PUTFIELD;
 import org.apache.bcel.util.SyntheticRepository;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
+import edu.umd.cs.findbugs.LocalVariableAnnotation;
 import edu.umd.cs.findbugs.OpcodeStack;
 import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.ba.AnalysisContext;
@@ -55,11 +60,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private boolean isFirstVisit;
     private String currentPackageName;
     private XField currentLockField = null;
-    private LocalVariable localVariable = null;
     private final Set<Method> methodsToReport = new HashSet<>();
     private final Set<Method> unsynchronizedMethods = new HashSet<>();
     private final Set<JavaClass> classesNotToReport = new HashSet<>();
     private final Set<Method> methodsLocalVarReport = new HashSet<>();
+    private final Queue<LocalVariableAnnotation> localVariableAnnotationsQueue = new LinkedList<>();
 
     public AvoidClientSideLocking(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
@@ -134,8 +139,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
         if (seen == Const.MONITORENTER) {
             if (getLocalVariableTableFromMethod() != null && getLockVariableFromStack(stack) != null) {
-                localVariable = getLockVariableFromStack(stack);
                 org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
+                LocalVariable localVariable = getLockVariableFromStack(stack);
                 JavaClass localVarClass = null;
                 try {
                     repository.loadClass(ClassName
@@ -147,6 +152,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 } catch (NullPointerException e) {
                     AnalysisContext.logError("NullPointerException: " + e.getMessage(), e);
                 }
+
+
                 if (localVarClass != null && localVarClass.getPackageName().equals(currentPackageName)) {
                     methodsLocalVarReport.add(getMethod());
                 }
@@ -158,6 +165,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
                         && overridesSuperclassMethod(getThisClass(), methodC)) {
                     methodsToReport.add(getMethod());
+
                 }
             }
         }
@@ -168,17 +176,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         if (currentLockField != null) {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
-                        .addClass(jc).addMethod(jc, method).addField(currentLockField)
-                        .addString(
-                                "All methods must be synchronized when using the field as a lock object in a synchronized block"));
+                        .addClass(jc).addMethod(jc, method).addField(currentLockField));
             }
         }
         if (!classesNotToReport.contains(jc) && currentLockField == null) {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(
                         new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE", NORMAL_PRIORITY)
-                                .addClass(jc).addMethod(jc, method)
-                                .addString("Do not use a return value as a lock object in a synchronized block"));
+                                .addClass(jc).addMethod(jc, method));
             }
         }
 
@@ -186,8 +191,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             for (Method method : methodsLocalVarReport) {
                 bugReporter.reportBug(
                         new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
-                                .addClass(jc).addMethod(jc, method)
-                                .addString("Local variable used as lock"));
+                                .addClass(jc).addMethod(jc, method).add(localVariableAnnotationsQueue.remove()));
             }
         }
 
@@ -197,6 +201,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         classesNotToReport.clear();
         super.visitAfter(jc);
     }
+
 
     private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         if (stack.getStackDepth() <= 0) {
@@ -249,13 +254,30 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         for (Location location : cfg.orderedLocations()) {
             InstructionHandle handle = location.getHandle();
             Instruction instruction = handle.getInstruction();
-
+            int pc = handle.getPosition();
+            boolean synchBlock = false;
+            if (instruction instanceof MONITORENTER) {
+                synchBlock = true;
+            }
+            if (instruction instanceof MONITOREXIT) {
+                synchBlock = true;
+            }
             if (instruction instanceof PUTFIELD) {
                 OpcodeStack stack = OpcodeStackScanner.getStackAt(classContext.getJavaClass(), method,
                         handle.getPosition());
                 OpcodeStack.Item stackItem = stack.getStackItem(0);
                 if (isConcurrentOrSynchronizedField(stackItem.getReturnValueOf())) {
                     classesNotToReport.add(classContext.getJavaClass());
+                }
+            } else if (synchBlock) {
+                OpcodeStack stack = OpcodeStackScanner.getStackAt(classContext.getJavaClass(), method,
+                        handle.getPosition());
+                if (stack.getStackDepth() > 0) {
+                    LocalVariableAnnotation localVariableAnnotation = LocalVariableAnnotation.getLocalVariableAnnotation(method, stack.getStackItem(
+                            0), pc);
+                    if (localVariableAnnotation != null) {
+                        localVariableAnnotationsQueue.add(localVariableAnnotation);
+                    }
                 }
             }
         }

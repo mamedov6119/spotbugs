@@ -79,7 +79,7 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     @Test
     void testBadBookClass5() {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingExample1.class",
-                "avoidClientSideLocking/Book.class");
+                "avoidClientSideLocking/Book.class", "avoidClientSideLocking/SynchObj.class");
         assertLocalVariableBug("testing", "BadClientSideLockingExample1");
         assertNumOfACSLBugs(ACSL_LOCAL, 1);
         assertNumOfACSLBugs(ACSL_FIELD, 0);
