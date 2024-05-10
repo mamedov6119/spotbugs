@@ -121,7 +121,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     private void detectLockingProblems(int seen) {
         if (seen == Const.PUTFIELD || seen == Const.GETFIELD) {
-            if (!Const.CONSTRUCTOR_NAME.equals(getMethodName()) && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
+            if (!Const.CONSTRUCTOR_NAME.equals(getMethodName())
+                    && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
                     if (xfield.getName().equals(currentLockField.getName())
@@ -153,9 +154,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             }
             if (stack.getStackDepth() > 0) {
                 XMethod methodC = stack.getStackItem(0).getReturnValueOf();
-                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
+                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName())
+                        && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
                         && overridesSuperclassMethod(getThisClass(), methodC)) {
-
                     methodsToReport.add(getMethod());
                 }
             }
@@ -226,7 +227,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         return null;
     }
 
-    // Reference to the original method. Link: https://gitlab.inf.elte.hu/java-static-analysis/spotbugs/-/merge_requests/20/diffs#66a21fadeee4760e4e500b0a7becbbce65e3af18
+    // Reference to the original method. Link:
+    // https://gitlab.inf.elte.hu/java-static-analysis/spotbugs/-/merge_requests/20/diffs#66a21fadeee4760e4e500b0a7becbbce65e3af18
     private static boolean isConcurrentOrSynchronizedField(ClassMember classMember) {
         if (classMember == null) {
             return false;
@@ -259,7 +261,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
     }
 
-    // Reference to the original method. Link: https://github.com/spotbugs/spotbugs/blob/master/spotbugs/src/main/java/edu/umd/cs/findbugs/model/ClassFeatureSet.java#L125
+    // Reference to the original method. Link:
+    // https://github.com/spotbugs/spotbugs/blob/master/spotbugs/src/main/java/edu/umd/cs/findbugs/model/ClassFeatureSet.java#L125
     private boolean overridesSuperclassMethod(JavaClass javaClass, XMethod method) {
         if (method.isStatic()) {
             return false;
