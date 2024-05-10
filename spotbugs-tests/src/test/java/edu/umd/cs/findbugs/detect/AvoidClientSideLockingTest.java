@@ -23,9 +23,11 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     void testBadIPAddress1() {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingIP.class",
                 "avoidClientSideLocking/PrintableIPAddressList.class");
-        assertACSLBugInMultipleMethods(List.of("addAndPrintIPAddresses", "test"), "PrintableIPAddressList",
-                ACSL_RETURN);
+        assertReturnValueBug("addAndPrintIPAddresses", "PrintableIPAddressList");
+        assertReturnValueBug("test", "PrintableIPAddressList");
         assertNumOfACSLBugs(ACSL_RETURN, 2);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
@@ -34,20 +36,28 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 "avoidClientSideLocking/PrintableIPAddressList2.class");
         assertReturnValueBug("addAndPrintIPAddresses", "PrintableIPAddressList2");
         assertNumOfACSLBugs(ACSL_RETURN, 1);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
     void testBadBookClass1() {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
-        assertACSLBugInMultipleMethods(List.of("getDueDate", "issue"), "BadClientSideLockingBook", ACSL_FIELD);
+        assertFieldBug("getDueDate", "BadClientSideLockingBook");
+        assertFieldBug("issue", "BadClientSideLockingBook");
         assertNumOfACSLBugs(ACSL_FIELD, 2);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
     void testBadBookClass2() {
         performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
-        assertACSLBugInMultipleMethods(List.of("renew", "testing"), "BadExampleBook", ACSL_LOCAL);
+        assertLocalVariableBug("renew", "BadExampleBook");
+        assertLocalVariableBug("testing", "BadExampleBook");
         assertNumOfACSLBugs(ACSL_LOCAL, 2);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
     }
 
     @Test
@@ -55,6 +65,8 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class");
         assertFieldBug("issue", "BadClientSideLockingBookC");
         assertNumOfACSLBugs(ACSL_FIELD, 1);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
@@ -62,6 +74,8 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         performAnalysis("avoidClientSideLocking/BadClientSideLockingBookS.class", "avoidClientSideLocking/Book.class");
         assertFieldBug("getDueDate", "BadClientSideLockingBookS");
         assertNumOfACSLBugs(ACSL_FIELD, 1);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
@@ -70,6 +84,8 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 "avoidClientSideLocking/Book.class");
         assertLocalVariableBug("testing", "BadClientSideLockingExample1");
         assertNumOfACSLBugs(ACSL_LOCAL, 1);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
     }
 
     @Test
@@ -114,9 +130,7 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     private void assertZeroACSLBugs(String className) {
         final String[] bugTypes = new String[] { ACSL_FIELD, ACSL_RETURN, ACSL_LOCAL };
         for (String bugType : bugTypes) {
-            final BugInstanceMatcher bugTypeMatcher = new BugInstanceMatcherBuilder()
-                    .bugType(bugType).inClass(className).build();
-            assertThat(getBugCollection(), containsExactly(0, bugTypeMatcher));
+            assertNumOfACSLBugs(bugType, 0);
         }
     }
 
