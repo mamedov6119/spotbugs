@@ -19,8 +19,10 @@
 package edu.umd.cs.findbugs.detect;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -65,7 +67,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private final Set<Method> unsynchronizedMethods = new HashSet<>();
     private final Set<JavaClass> classesNotToReport = new HashSet<>();
     private final Set<Method> methodsLocalVarReport = new HashSet<>();
-    private final Queue<LocalVariableAnnotation> localVariableAnnotationsQueue = new LinkedList<>();
+    private final Map<Method, LocalVariableAnnotation> localVariableAnnotationsMap = new HashMap<>();
 
     public AvoidClientSideLocking(BugReporter bugReporter) {
         this.bugReporter = bugReporter;
@@ -78,14 +80,12 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         Method[] methods = jc.getMethods();
         for (Method obj : methods) {
             try {
-                collectConcurrentOrSynchronizedFieldsAndClassesNotToReport(getClassContext(), obj);
+                collectClassesNotToReportAndLocalVariableAnnotations(getClassContext(), obj);
             } catch (CFGBuilderException e) {
                 AnalysisContext.logError("CFGBuilderException: " + e.getMessage(), e);
             }
             if (!Const.CONSTRUCTOR_NAME.equals(obj.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(obj.getName())) {
-                if (obj.isSynchronized()) {
-                    getLocalVariableTableFromMethod();
-                } else {
+                if (!obj.isSynchronized()) {
                     unsynchronizedMethods.add(obj);
                     doVisitMethod(obj);
                 }
@@ -107,13 +107,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     if (unsynchronizedMethods.contains(getMethod())) {
                         unsynchronizedMethods.remove(getMethod());
                     }
-                    getLocalVariableTableFromMethod();
                 }
             }
         } else {
-            if (stack.getStackDepth() > 0) {
-                getLocalVariableTableFromMethod();
-            }
             detectLockingProblems(seen);
         }
     }
@@ -153,12 +149,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 } catch (NullPointerException e) {
                     AnalysisContext.logError("NullPointerException: " + e.getMessage(), e);
                 }
-
-
                 if (localVarClass != null && localVarClass.getPackageName().equals(currentPackageName)) {
                     methodsLocalVarReport.add(getMethod());
                 }
-
             }
             if (stack.getStackDepth() > 0) {
                 XMethod methodC = stack.getStackItem(0).getReturnValueOf();
@@ -190,9 +183,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
         if (!methodsLocalVarReport.isEmpty()) {
             for (Method method : methodsLocalVarReport) {
-                bugReporter.reportBug(
-                        new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
-                                .addClass(jc).addMethod(jc, method).add(localVariableAnnotationsQueue.remove()));
+                if (localVariableAnnotationsMap.containsKey(method)) {
+                    bugReporter.reportBug(
+                            new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
+                                    .addClass(jc).addMethod(jc, method).add(localVariableAnnotationsMap.get(method)));
+                }
             }
         }
 
@@ -249,7 +244,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         && classMember.getSignature().endsWith(")V"));
     }
 
-    private void collectConcurrentOrSynchronizedFieldsAndClassesNotToReport(ClassContext classContext, Method method)
+    private void collectClassesNotToReportAndLocalVariableAnnotations(ClassContext classContext, Method method)
             throws CFGBuilderException {
         CFG cfg = classContext.getCFG(method);
         for (Location location : cfg.orderedLocations()) {
@@ -277,7 +272,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     LocalVariableAnnotation localVariableAnnotation = LocalVariableAnnotation.getLocalVariableAnnotation(method, stack.getStackItem(
                             0), pc);
                     if (localVariableAnnotation != null) {
-                        localVariableAnnotationsQueue.add(localVariableAnnotation);
+                        localVariableAnnotationsMap.put(method, localVariableAnnotation);
                     }
                 }
             }
