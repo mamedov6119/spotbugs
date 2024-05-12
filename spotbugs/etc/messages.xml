@@ -9302,7 +9302,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1} the method {2} utilizes client-side locking on a return value, it is advised to avoid this practice.</LongDescription>
+    <LongDescription>In class {1} the method {2} utilizes client-side locking on a return value of {3}, it is advised to avoid this practice.</LongDescription>
     <Details>
         <![CDATA[
             <p>

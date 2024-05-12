@@ -57,9 +57,10 @@ import edu.umd.cs.findbugs.util.ClassName;
 public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     private final BugReporter bugReporter;
-    private boolean isFirstVisit;
-    private String currentPackageName;
+    private boolean isFirstVisit = false;
+    private String currentPackageName = null;
     private XField currentLockField = null;
+    private XMethod methodToAdd = null;
     private final Set<Method> methodsToReport = new HashSet<>();
     private final Set<Method> unsynchronizedMethods = new HashSet<>();
     private final Set<JavaClass> classesNotToReport = new HashSet<>();
@@ -165,7 +166,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                         && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
                         && overridesSuperclassMethod(getThisClass(), methodC)) {
                     methodsToReport.add(getMethod());
-
+                    methodToAdd = methodC;
                 }
             }
         }
@@ -183,7 +184,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(
                         new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE", NORMAL_PRIORITY)
-                                .addClass(jc).addMethod(jc, method));
+                                .addClass(jc).addMethod(jc, method).addMethod(methodToAdd));
             }
         }
 
