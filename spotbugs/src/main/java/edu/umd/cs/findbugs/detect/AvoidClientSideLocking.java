@@ -113,7 +113,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         } else {
             if (stack.getStackDepth() > 0) {
                 getLocalVariableTableFromMethod();
-            }
+            } // sss
             detectLockingProblems(seen);
         }
     }
