@@ -1,35 +1,34 @@
 package avoidClientSideLocking;
 
 import java.util.Calendar;
-import avoidClientSideLocking.Book;
 
-public final class GoodClientSideLockingBook {
+public class BadClientSideLockingBook2 {
+    // Client
     private Book book;
-    private final Object lock = new Object();
 
-    GoodClientSideLockingBook(Book book) {
+    BadClientSideLockingBook2(Book book) {
         this.book = book;
     }
 
     public void issue(int days) {
-        synchronized (lock) {
-            book.issue(days);
-        }
+        book.issue(days);
     }
 
-    public Calendar getDueDate() {
-        synchronized (lock) {
-            return book.getDueDate();
-        }
+    public synchronized Calendar getDueDate() {
+        return book.getDueDate();
     }
 
     public void renew() {
-        synchronized (lock) {
+        synchronized (book) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
             } else {
                 book.issue(14); // Issue book for 14 days
             }
         }
+    }
+
+    public void someMethod() {
+        
     }
 }

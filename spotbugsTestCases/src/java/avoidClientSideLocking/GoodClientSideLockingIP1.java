@@ -19,10 +19,10 @@ class IPAddressList {
   }
 }
 
-public class GoodClientSideLockingIP {
+public class GoodClientSideLockingIP1 {
     private final IPAddressList ips;
  
-  public GoodClientSideLockingIP(IPAddressList list) {
+  public GoodClientSideLockingIP1(IPAddressList list) {
     this.ips = list;
   }
  

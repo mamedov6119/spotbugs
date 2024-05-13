@@ -1,17 +1,15 @@
 package avoidClientSideLocking;
 
 import java.util.Calendar;
-import avoidClientSideLocking.Book;
 
-public class BadClientSideLockingBookC {
-    // Client
+public class GoodClientSideLockingBook1 {
     private Book book;
 
-    BadClientSideLockingBookC(Book book) {
+    GoodClientSideLockingBook1(Book book) {
         this.book = book;
     }
 
-    public void issue(int days) {
+    public synchronized void issue(int days) {
         book.issue(days);
     }
 
@@ -27,9 +25,5 @@ public class BadClientSideLockingBookC {
                 book.issue(14); // Issue book for 14 days
             }
         }
-    }
-
-    public void someMethod() {
-        
     }
 }

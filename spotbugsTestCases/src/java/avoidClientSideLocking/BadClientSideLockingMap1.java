@@ -3,7 +3,7 @@ package avoidClientSideLocking;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BadClientSideLockingMap {
+public class BadClientSideLockingMap1 {
     private final Map<String, Integer> dataMap = new HashMap<>();
 
     public Map<String, Integer> getDataMap() {
@@ -15,12 +15,12 @@ public class BadClientSideLockingMap {
     }
 }
 
-class DataUpdater {
-    public void фыв(BadClientSideLockingMap obj, String key, int value) {
+class DataUpdater extends BadClientSideLockingMap1 {
+    public void updateAndPrintData(String key, int value) {
         //Error: if BadClientSideLockingMap changes its locking strategy in the future, this client code may break
-        synchronized (obj.getDataMap()) {
-            obj.updateData(key, value);
-            System.out.println(obj.getDataMap());
+        synchronized (getDataMap()) {
+            updateData(key, value);
+            System.out.println(getDataMap());
         }
     }
 }

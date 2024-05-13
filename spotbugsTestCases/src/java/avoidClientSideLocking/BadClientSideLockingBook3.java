@@ -2,16 +2,17 @@ package avoidClientSideLocking;
 
 import java.util.Calendar;
 
-public class BadClientSideLockingBook {
+public class BadClientSideLockingBook3 {
     // Client
     private Book book;
+    private int days;
 
-    BadClientSideLockingBook(Book book) {
+    BadClientSideLockingBook3(Book book, int days) {
         this.book = book;
+        this.days = days;
     }
 
-    // error in the methods that use book but are not synchronized
-    public void issue(int days) {
+    public synchronized void issue(int days) {
         book.issue(days);
     }
 
@@ -25,12 +26,12 @@ public class BadClientSideLockingBook {
                 throw new IllegalStateException("Book overdue");
             } else {
                 book.issue(14); // Issue book for 14 days
+                days = 14;
             }
         }
     }
 
-    public void hartoshhka(int days) {
-        System.out.println("Hartoshka");
+    public void smth() {
+        System.out.println("smth");
     }
-
 }

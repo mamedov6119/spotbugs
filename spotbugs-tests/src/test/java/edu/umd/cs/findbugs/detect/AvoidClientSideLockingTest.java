@@ -19,7 +19,7 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadIPAddress1() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingIP.class",
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingIP1.class",
                 "avoidClientSideLocking/PrintableIPAddressList.class");
         assertReturnValueBug("addAndPrintIPAddresses", "PrintableIPAddressList");
         assertReturnValueBug("test", "PrintableIPAddressList");
@@ -40,9 +40,9 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadBookClass1() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook.class", "avoidClientSideLocking/Book.class");
-        assertFieldBug("getDueDate", "BadClientSideLockingBook");
-        assertFieldBug("issue", "BadClientSideLockingBook");
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook1.class", "avoidClientSideLocking/Book.class");
+        assertFieldBug("getDueDate", "BadClientSideLockingBook1");
+        assertFieldBug("issue", "BadClientSideLockingBook1");
         assertNumOfACSLBugs(ACSL_FIELD, 2);
         assertNumOfACSLBugs(ACSL_RETURN, 0);
         assertNumOfACSLBugs(ACSL_LOCAL, 0);
@@ -50,55 +50,70 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadBookClass2() {
-        performAnalysis("avoidClientSideLocking/BadExampleBook.class", "avoidClientSideLocking/Book.class");
-        assertLocalVariableBug("renew", "BadExampleBook");
-        assertLocalVariableBug("testing", "BadExampleBook");
-        assertNumOfACSLBugs(ACSL_LOCAL, 2);
-        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook2.class", "avoidClientSideLocking/Book.class");
+        assertFieldBug("issue", "BadClientSideLockingBook2");
+        assertNumOfACSLBugs(ACSL_FIELD, 1);
         assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
     void testBadBookClass3() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBookC.class", "avoidClientSideLocking/Book.class");
-        assertFieldBug("issue", "BadClientSideLockingBookC");
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook3.class", "avoidClientSideLocking/Book.class");
+        assertFieldBug("getDueDate", "BadClientSideLockingBook3");
         assertNumOfACSLBugs(ACSL_FIELD, 1);
         assertNumOfACSLBugs(ACSL_RETURN, 0);
         assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
+
 
     @Test
     void testBadBookClass4() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingBookS.class", "avoidClientSideLocking/Book.class");
-        assertFieldBug("getDueDate", "BadClientSideLockingBookS");
-        assertNumOfACSLBugs(ACSL_FIELD, 1);
-        assertNumOfACSLBugs(ACSL_RETURN, 0);
-        assertNumOfACSLBugs(ACSL_LOCAL, 0);
-    }
-
-    @Test
-    void testBadBookClass5() {
-        performAnalysis("avoidClientSideLocking/BadClientSideLockingExample1.class",
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook4.class",
                 "avoidClientSideLocking/Book.class", "avoidClientSideLocking/SynchObj.class");
-        assertLocalVariableBug("testing", "BadClientSideLockingExample1");
+        assertLocalVariableBug("testing", "BadClientSideLockingBook4");
         assertNumOfACSLBugs(ACSL_LOCAL, 1);
         assertNumOfACSLBugs(ACSL_FIELD, 0);
         assertNumOfACSLBugs(ACSL_RETURN, 0);
     }
 
     @Test
+    void testBadBookClass5() {
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingBook5.class", "avoidClientSideLocking/Book.class");
+        assertLocalVariableBug("renew", "BadClientSideLockingBook5");
+        assertLocalVariableBug("testing", "BadClientSideLockingBook5");
+        assertNumOfACSLBugs(ACSL_LOCAL, 2);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+    }
+
+    @Test
+    void testBadMapClass1() {
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingMap1.class",
+                "avoidClientSideLocking/DataUpdater.class");
+        assertReturnValueBug("updateAndPrintData", "DataUpdater");
+        assertNumOfACSLBugs(ACSL_RETURN, 1);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+    }
+
+    @Test
     void testGoodLocking() {
-        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook.class", "avoidClientSideLocking/Book.class",
-                "avoidClientSideLocking/GoodClientSideLockingIP.class", "avoidClientSideLocking/IPAddressList.class",
+        performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
+                "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",
+                "avoidClientSideLocking/GoodClientSideLockingIP1.class", "avoidClientSideLocking/IPAddressList.class",
                 "avoidClientSideLocking/Repository.class", "avoidClientSideLocking/Repository$1.class",
-                "avoidClientSideLocking/Repository$RepositoryDateFormat.class");
-        assertZeroACSLBugs("GoodClientSideLockingBook");
+                "avoidClientSideLocking/Repository$RepositoryDateFormat.class",
+                "avoidClientSideLocking/DataUpdaterr.class");
+        assertZeroACSLBugs("GoodClientSideLockingBook1");
+        assertZeroACSLBugs("GoodClientSideLockingBook2");
         assertZeroACSLBugs("Book");
         assertZeroACSLBugs("GoodClientSideLockingIP");
         assertZeroACSLBugs("IPAddressList");
         assertZeroACSLBugs("Repository");
         assertZeroACSLBugs("Repository$1");
         assertZeroACSLBugs("Repository$RepositoryDateFormat");
+        assertZeroACSLBugs("DataUpdaterr");
     }
 
     private void assertReturnValueBug(String method, String className) {

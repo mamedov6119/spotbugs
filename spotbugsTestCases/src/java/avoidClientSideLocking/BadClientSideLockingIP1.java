@@ -8,7 +8,7 @@ import java.util.List;
 // This class could change its locking policy in the future,
 // for example, if new non-atomic methods are added
 
-public class BadClientSideLockingIP {
+public class BadClientSideLockingIP1 {
     private final List<InetAddress> ips = Collections.synchronizedList(new ArrayList<InetAddress>());
 
     public List<InetAddress> getList() {
@@ -21,7 +21,7 @@ public class BadClientSideLockingIP {
     }
 }
 
-class PrintableIPAddressList extends BadClientSideLockingIP {
+class PrintableIPAddressList extends BadClientSideLockingIP1 {
     public void addAndPrintIPAddresses(InetAddress address) {
         // Error: If the underlying locking policy of BadClientSideLockingIP changes in the future, this client-side locking may not align with the actual locking strategy, leading to potential issues
         synchronized (getList()) { 

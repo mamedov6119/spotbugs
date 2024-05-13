@@ -2,26 +2,25 @@ package avoidClientSideLocking;
 
 import java.util.Calendar;
 
-
-public class BadExampleBook {
+public class BadClientSideLockingBook1 {
     // Client
     private Book book;
 
-    BadExampleBook(Book book) {
+    BadClientSideLockingBook1(Book book) {
         this.book = book;
     }
 
-    public synchronized void issue(int days) {
+    // error in the methods that use book but are not synchronized
+    public void issue(int days) {
         book.issue(days);
     }
 
-    public synchronized Calendar getDueDate() {
+    public Calendar getDueDate() {
         return book.getDueDate();
     }
 
     public void renew() {
-        SynchObj AUE = new SynchObj();
-        synchronized (AUE) {
+        synchronized (book) {
             if (book.getDueDate().before(Calendar.getInstance())) {
                 throw new IllegalStateException("Book overdue");
             } else {
@@ -30,14 +29,8 @@ public class BadExampleBook {
         }
     }
 
-    public void testing() {
-        SynchObj aaaa = new SynchObj();
-        synchronized (aaaa) {
-            book.issue(14);
-        }
+    public void hartoshhka(int days) {
+        System.out.println("Hartoshka");
     }
 
-    public void justLocal() {
-        Book bb = new Book("badBook");
-    }
 }

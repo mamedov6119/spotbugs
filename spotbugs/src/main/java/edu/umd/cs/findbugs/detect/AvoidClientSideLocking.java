@@ -21,9 +21,7 @@ package edu.umd.cs.findbugs.detect;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.apache.bcel.Const;
@@ -171,6 +169,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
                         .addClass(jc).addMethod(jc, method).addField(currentLockField));
+                System.out.println("method reported: " + method);
             }
         }
         if (!classesNotToReport.contains(jc) && currentLockField == null) {
