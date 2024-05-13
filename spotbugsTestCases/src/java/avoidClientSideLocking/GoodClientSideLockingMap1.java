@@ -3,7 +3,7 @@ package avoidClientSideLocking;
 import java.util.HashMap;
 import java.util.Map;
 
-class GoodClientSideLockingMap1 {
+class DataUpdaterr {
     private final Map<String, Integer> dataMap = new HashMap<>();
 
     public Map<String, Integer> getDataMap() {
@@ -15,11 +15,11 @@ class GoodClientSideLockingMap1 {
     }
 }
 
-public class DataUpdaterr  {
+public class GoodClientSideLockingMap1  {
 
-    private final GoodClientSideLockingMap1 data;
+    private final DataUpdaterr data;
 
-    public DataUpdaterr(GoodClientSideLockingMap1 data) {
+    public GoodClientSideLockingMap1(DataUpdaterr data) {
         this.data = data;
     }
 

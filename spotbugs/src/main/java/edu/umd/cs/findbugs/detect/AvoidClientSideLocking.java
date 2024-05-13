@@ -83,7 +83,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 AnalysisContext.logError("CFGBuilderException: " + e.getMessage(), e);
             }
             if (!Const.CONSTRUCTOR_NAME.equals(obj.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(obj.getName())) {
-                if (!obj.isSynchronized()) {
+                if (obj.isSynchronized()) {
+                    getLocalVariableTableFromMethod();
+                } else {
                     unsynchronizedMethods.add(obj);
                     doVisitMethod(obj);
                 }
@@ -105,9 +107,13 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     if (unsynchronizedMethods.contains(getMethod())) {
                         unsynchronizedMethods.remove(getMethod());
                     }
+                    getLocalVariableTableFromMethod();
                 }
             }
         } else {
+            if (stack.getStackDepth() > 0) {
+                getLocalVariableTableFromMethod();
+            }
             detectLockingProblems(seen);
         }
     }
@@ -169,7 +175,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
                         .addClass(jc).addMethod(jc, method).addField(currentLockField));
-                System.out.println("method reported: " + method);
             }
         }
         if (!classesNotToReport.contains(jc) && currentLockField == null) {

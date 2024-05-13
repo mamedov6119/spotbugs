@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 
-public abstract class Repository {
+public abstract class GoodRepository1 {
     public Date parse(String dateString) throws ParseException {
         final DateFormat format = getDateFormat();
         synchronized (format) {

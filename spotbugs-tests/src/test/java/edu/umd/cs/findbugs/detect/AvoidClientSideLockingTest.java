@@ -102,18 +102,18 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
                 "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",
                 "avoidClientSideLocking/GoodClientSideLockingIP1.class", "avoidClientSideLocking/IPAddressList.class",
-                "avoidClientSideLocking/Repository.class", "avoidClientSideLocking/Repository$1.class",
-                "avoidClientSideLocking/Repository$RepositoryDateFormat.class",
-                "avoidClientSideLocking/DataUpdaterr.class");
+                "avoidClientSideLocking/GoodRepository1.class", "avoidClientSideLocking/GoodRepository1$1.class",
+                "avoidClientSideLocking/GoodRepository1$RepositoryDateFormat.class",
+                "avoidClientSideLocking/GoodClientSideLockingMap1.class");
         assertZeroACSLBugs("GoodClientSideLockingBook1");
         assertZeroACSLBugs("GoodClientSideLockingBook2");
         assertZeroACSLBugs("Book");
-        assertZeroACSLBugs("GoodClientSideLockingIP");
+        assertZeroACSLBugs("GoodClientSideLockingIP1");
         assertZeroACSLBugs("IPAddressList");
-        assertZeroACSLBugs("Repository");
-        assertZeroACSLBugs("Repository$1");
-        assertZeroACSLBugs("Repository$RepositoryDateFormat");
-        assertZeroACSLBugs("DataUpdaterr");
+        assertZeroACSLBugs("GoodRepository1");
+        assertZeroACSLBugs("GoodRepository1$1");
+        assertZeroACSLBugs("GoodRepository1$RepositoryDateFormat");
+        assertZeroACSLBugs("GoodClientSideLockingMap1");
     }
 
     private void assertReturnValueBug(String method, String className) {
