@@ -115,15 +115,7 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
                 "avoidClientSideLocking/GoodRepository1.class", "avoidClientSideLocking/GoodRepository1$1.class",
                 "avoidClientSideLocking/GoodRepository1$RepositoryDateFormat.class",
                 "avoidClientSideLocking/GoodClientSideLockingMap1.class");
-        assertZeroACSLBugs("GoodClientSideLockingBook1");
-        assertZeroACSLBugs("GoodClientSideLockingBook2");
-        assertZeroACSLBugs("Book");
-        assertZeroACSLBugs("GoodClientSideLockingIP1");
-        assertZeroACSLBugs("IPAddressList");
-        assertZeroACSLBugs("GoodRepository1");
-        assertZeroACSLBugs("GoodRepository1$1");
-        assertZeroACSLBugs("GoodRepository1$RepositoryDateFormat");
-        assertZeroACSLBugs("GoodClientSideLockingMap1");
+        assertZeroACSLBugs();
     }
 
     private void assertReturnValueBug(String method, String className) {
@@ -150,11 +142,10 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertThat(getBugCollection(), containsExactly(num, bugTypeMatcher));
     }
 
-    private void assertZeroACSLBugs(String className) {
-        final String[] bugTypes = new String[] { ACSL_FIELD, ACSL_RETURN, ACSL_LOCAL };
-        for (String bugType : bugTypes) {
-            assertNumOfACSLBugs(bugType, 0);
-        }
+    private void assertZeroACSLBugs() {
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
 }
