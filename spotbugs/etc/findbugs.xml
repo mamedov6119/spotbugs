@@ -689,7 +689,7 @@
           <Detector class="edu.umd.cs.findbugs.detect.AvoidClientSideLocking" speed="fast"
                     reports="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD,ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE,ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE"/>
     <!-- Bug Categories -->
-        <BugCategory category="NOISE" hidden="true"/>
+          <BugCategory category="NOISE" hidden="true"/>
 
           <!-- Bug Codes -->
           <BugCode abbrev="USELESS_STRING"/>

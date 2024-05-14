@@ -9283,7 +9283,8 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                All methods must be synchronized when using the field as a lock object in a synchronized block.
+                When synchronizing on a class field coming from another class, it is important to make sure that the syncrhonizations strategy is followed.
+                All methods using the class field should be synchronized on the same object to avoid concurrency issues.
                 It is a good practice to avoid synchronization on fields of classes that do not explicitly document their locking strategy. 
                 For example, if a filed is an instance of a class that does not commit to its locking strategy.
                 Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
@@ -9306,7 +9307,8 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                Do not use a return value as a lock object in a synchronized block.
+                A subclass is using an object owned and locked by its superclass in client-side locking.
+                Do not use a return value methods of a superclass as a lock object in a synchronized block.
                 It is a good practice to avoid synchronization on return values of methods of classes that do not explicitly document their locking strategy.
                 For example, if a method returns an object owned and locked by its superclass.
                 Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
@@ -9329,8 +9331,8 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                Local variable is used as a lock in a synchronized block.
-                It is a good practice to avoid synchronization on local variables that are instantiated in methods using synchronization.
+                Local variable coming from another class is used as a lock object in a synchronized block.
+                It is a good practice to avoid synchronizing on local variables from the same package but different class.
                 For example, if the implementation of the local variable's class is unknown or located outside of the workspace package.
                 Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
                 The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.

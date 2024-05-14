@@ -103,7 +103,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (stack.getStackDepth() > 0) {
                     if (stack.getStackItem(0).getXField() != null) {
                         currentLockField = stack.getStackItem(0).getXField();
+
                     }
+
                     if (unsynchronizedMethods.contains(getMethod())) {
                         unsynchronizedMethods.remove(getMethod());
                     }
@@ -114,6 +116,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (stack.getStackDepth() > 0) {
                 getLocalVariableTableFromMethod();
             } // sss
+
             detectLockingProblems(seen);
         }
     }
@@ -126,18 +129,21 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     }
 
     private void detectLockingProblems(int seen) {
-        if (seen == Const.PUTFIELD || seen == Const.GETFIELD) {
+        if (seen == Const.PUTFIELD || seen == Const.GETFIELD || seen == Const.GETSTATIC || seen == Const.PUTSTATIC) {
             if (!Const.CONSTRUCTOR_NAME.equals(getMethodName())
                     && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
-                    if (xfield.getName().equals(currentLockField.getName())
-                            && unsynchronizedMethods.contains(getMethod())) {
+                    if ((xfield.getName().equals(currentLockField.getName())
+                            && unsynchronizedMethods.contains(getMethod())) || (xfield.isStatic() && xfield.getPackageName().equals(
+                                    currentPackageName) && unsynchronizedMethods.contains(getMethod()))) {
                         methodsToReport.add(getMethod());
                     }
+
                 }
             }
         }
+
         if (seen == Const.MONITORENTER) {
             if (getLocalVariableTableFromMethod() != null && getLockVariableFromStack(stack) != null) {
                 org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
@@ -171,7 +177,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     @Override
     public void visitAfter(JavaClass jc) {
-        if (currentLockField != null) {
+        if (currentLockField != null && !unsynchronizedMethods.isEmpty()) {
             for (Method method : methodsToReport) {
                 bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
                         .addClass(jc).addMethod(jc, method).addField(currentLockField));
