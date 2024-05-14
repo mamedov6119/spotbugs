@@ -9283,17 +9283,16 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                When synchronizing on a class field coming from another class, it is important to make sure that the syncrhonizations strategy is followed.
-                All methods using the class field should be synchronized on the same object to avoid concurrency issues.
-                It is a good practice to avoid synchronization on fields of classes that do not explicitly document their locking strategy. 
-                For example, if a filed is an instance of a class that does not commit to its locking strategy.
-                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
-                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
-            </p>
-            <p>
-              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
-              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
-              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+                Synchronizing on class fields from externmal classes needs to be done with careful attention to their synchronization strategy to avoid concurrency issues.
+                It is important for all methods accessing such field to synchronize on the same object.
+                Avoid using client-side locks on fields from classes that do not explicitly document their locking strategy because it can lead to severe concurrency issues, including deadlocks.
+                Lack of a clear locking protocol in these classes can compromise data integrity and degrade the performance because of unsafe hadnling of their internal state across multiple threads.
+
+                A few key points to keep in mind when synchronizing on fields from external classes:
+                <ul>
+                  <li>Use private final lock objects withing a class to encapsulate the synchronization mechanism fully.</li>
+                  <li>Reduce the scope of locks to minimal necessary code block to decrease contention and improve the performance.</li>
+                </ul>
             </p>
             <p>
             See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
@@ -9307,17 +9306,16 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                A subclass is using an object owned and locked by its superclass in client-side locking.
-                Do not use a return value methods of a superclass as a lock object in a synchronized block.
-                It is a good practice to avoid synchronization on return values of methods of classes that do not explicitly document their locking strategy.
-                For example, if a method returns an object owned and locked by its superclass.
-                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
-                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
-            </p>
-            <p>
-              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
-              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
-              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+                Synchronizing on method return values from the methods of the superclasses requires careful thought about concurrency.
+                It is necessary to know what the superclass synchronization strategy is and go around problems like deadlock and inconsistent state.
+                All methods that access and synchronize on such return values should ensure proper syncrhonization.
+                Avoid syncrhonization on the objects being returned by the methods of the superclass, unless you are sure about their synchronization strategy.
+
+                A few key points to keep in mind when dealing with synchronization issues of return values from superclass methods:
+                <ul>
+                  <li>Check for superclass' synchronization strategy: Understand how it manages the life cycle and the state of the returned object.</li>
+                  <li>Consider alternative synchronization mechanisms: Use higher-level concurrency controls provided by Java, like <code>ReentrantLock</code> or <code>java.util.concurrent</code> classes, which allow more flexible synchronization strategies</li>
+                </ul>
             </p>
             <p>
             See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.
@@ -9331,16 +9329,15 @@ Using floating-point variables should not be used as loop counters, as they are 
     <Details>
         <![CDATA[
             <p>
-                Local variable coming from another class is used as a lock object in a synchronized block.
-                It is a good practice to avoid synchronizing on local variables from the same package but different class.
-                For example, if the implementation of the local variable's class is unknown or located outside of the workspace package.
-                Using client-side locks in such scenarios can introduce some serious concurrency issues, including deadlocks.
-                The absence of a clear locking protocol in the utilized classes means that their internal state might not be managed safely across multiple threads, putting both data integrity and application performance at risk.
-            </p>
-            <p>
-              To avoid this issue, consider using classes that explicitly define their synchronization strategy. 
-              Alternatively, utilize higher-level concurrency mechanisms provided by Java, such as <code>ConcurrentHashMap</code> or other thread-safe collections that manage their own locking and synchronization. 
-              This approach simplifies the development process and enhances safety by reducing the likelihood of concurrency-related bugs.
+                Synchronization on local varaibles from classes withing the same package is risky, it is important to be cautious because these classes are often closely related and might undergo some modifications by other developers.
+                Expecially if the locking strategy is not clearly defined and implemented consistently throughout the package, it can lead to severe concurrency issues, including deadlocks.
+                Using local variables from the same package as locks can complicate the thread safety measures in the application.
+
+                A few key points to keep in mind when dealing with synchronization on local variables from another class in the same package:
+                <ul>
+                  <li>Thoroughly review all synchronization: Check the synchronization strategies applied by all classes inside the package to make sure they are compatible.</li>
+                  <li>Consider alternative synchronization mechanisms: Use higher-level concurrency controls provided by Java, like <code>ReentrantLock</code> or <code>java.util.concurrent</code> classes, which allow more flexible synchronization strategies</li>
+                </ul>
             </p>
             <p>
             See SEI CERT rule <a href="https://wiki.sei.cmu.edu/confluence/display/java/LCK11-J.+Avoid+client-side+locking+when+using+classes+that+do+not+commit+to+their+locking+strategy">LCK11-J. Avoid client-side locking when using classes that do not commit to their locking strategy</a>.

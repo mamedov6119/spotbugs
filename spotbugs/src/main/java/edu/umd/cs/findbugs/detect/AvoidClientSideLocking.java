@@ -33,6 +33,7 @@ import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.LocalVariableAnnotation;
 import edu.umd.cs.findbugs.OpcodeStack;
+import edu.umd.cs.findbugs.SourceLineAnnotation;
 import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.ba.AnalysisContext;
 import edu.umd.cs.findbugs.ba.Hierarchy;
@@ -48,7 +49,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     private boolean isFirstVisit = false;
     private String currentPackageName = null;
     private XField currentLockField = null;
-    private XMethod methodToAdd = null;
+    private XMethod returnMethodUsedAsLock = null;
     private final Set<Method> methodsToReport = new HashSet<>();
     private final Set<Method> unsynchronizedMethods = new HashSet<>();
     private final Set<Method> methodsLocalVarReport = new HashSet<>();
@@ -66,7 +67,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         for (Method obj : methods) {
             if (!Const.CONSTRUCTOR_NAME.equals(obj.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(obj.getName())) {
                 if (obj.isSynchronized()) {
-                    getLocalVariableTableFromMethod();
+                    getLocalVariableTableOfMethod();
                 } else {
                     unsynchronizedMethods.add(obj);
                     doVisitMethod(obj);
@@ -90,24 +91,20 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     if (unsynchronizedMethods.contains(getMethod())) {
                         unsynchronizedMethods.remove(getMethod());
                     }
-                    getLocalVariableTableFromMethod();
-                    LocalVariableAnnotation localVariableAnnotation = LocalVariableAnnotation.getLocalVariableAnnotation(
-                            getMethod(), stack.getStackItem(0), getPC());
+                    LocalVariableAnnotation localVariableAnnotation = LocalVariableAnnotation
+                            .getLocalVariableAnnotation(
+                                    getMethod(), stack.getStackItem(0), getPC());
                     if (localVariableAnnotation != null) {
                         localVariableAnnotationsMap.put(getMethod(), localVariableAnnotation);
                     }
                 }
             }
         } else {
-            if (stack.getStackDepth() > 0) {
-                getLocalVariableTableFromMethod();
-            }
-
             detectLockingProblems(seen);
         }
     }
 
-    private LocalVariableTable getLocalVariableTableFromMethod() {
+    private LocalVariableTable getLocalVariableTableOfMethod() {
         if (stack != null && stack.getStackDepth() > 0) {
             return getMethod().getLocalVariableTable();
         }
@@ -116,14 +113,14 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     private void detectLockingProblems(int seen) {
         if (seen == Const.PUTFIELD || seen == Const.GETFIELD || seen == Const.GETSTATIC || seen == Const.PUTSTATIC) {
-            if (!Const.CONSTRUCTOR_NAME.equals(getMethodName())
-                    && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
+            if (!Const.CONSTRUCTOR_NAME.equals(getMethodName()) && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
-                    if ((xfield.getName().equals(currentLockField.getName())
-                            && unsynchronizedMethods.contains(getMethod())) || (xfield.isStatic() && xfield.getPackageName().equals(
-                                    currentPackageName) && unsynchronizedMethods.contains(getMethod()))) {
+                    if ((xfield == currentLockField && unsynchronizedMethods.contains(getMethod())) || (xfield.isStatic() && currentPackageName
+                            .equals(xfield.getPackageName()) && unsynchronizedMethods.contains(getMethod()))) {
                         methodsToReport.add(getMethod());
+                        reportClassFieldBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this,
+                                getPC()));
                     }
 
                 }
@@ -131,68 +128,68 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
 
         if (seen == Const.MONITORENTER) {
-            if (getLocalVariableTableFromMethod() != null && getLockVariableFromStack(stack) != null) {
+            if (getLocalVariableTableOfMethod() != null) {
                 org.apache.bcel.util.Repository repository = SyntheticRepository.getInstance();
                 LocalVariable localVariable = getLockVariableFromStack(stack);
-                JavaClass localVarClass = null;
-                try {
-                    repository.loadClass(ClassName
-                            .fromFieldSignatureToDottedClassName(localVariable.getSignature()));
-                    localVarClass = repository
-                            .loadClass(ClassName.fromFieldSignatureToDottedClassName(localVariable.getSignature()));
-                } catch (ClassNotFoundException e) {
-                    AnalysisContext.reportMissingClass(e);
-                } catch (NullPointerException e) {
-                    AnalysisContext.logError("NullPointerException: " + e.getMessage(), e);
-                }
-                if (localVarClass != null && localVarClass.getPackageName().equals(currentPackageName)) {
-                    methodsLocalVarReport.add(getMethod());
+                if (localVariable != null) {
+                    JavaClass localVarClass = null;
+                    try {
+                        localVarClass = repository.loadClass(ClassName.fromFieldSignatureToDottedClassName(localVariable.getSignature()));
+                        if (localVarClass != null && localVarClass.getPackageName().equals(currentPackageName)) {
+                            methodsLocalVarReport.add(getMethod());
+                            reportLocalVarBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this,
+                                    getPC()));
+                        }
+                    } catch (ClassNotFoundException e) {
+                        AnalysisContext.reportMissingClass(e);
+                    }
                 }
             }
             if (stack.getStackDepth() > 0) {
                 XMethod methodC = stack.getStackItem(0).getReturnValueOf();
-                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName())
-                        && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
+                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
                         && overridesSuperclassMethod(getThisClass(), methodC)) {
                     methodsToReport.add(getMethod());
-                    methodToAdd = methodC;
+                    returnMethodUsedAsLock = methodC;
+                    reportReturnValueBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this, getPC()));
                 }
+            }
+        }
+    }
+
+    private void reportClassFieldBug(JavaClass jc, Method m, SourceLineAnnotation sla) {
+        if (currentLockField != null && !unsynchronizedMethods.isEmpty()) {
+            bugReporter.reportBug(
+                    new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
+                            .addClassAndMethod(jc, m).addField(currentLockField).addSourceLine(sla));
+        }
+    }
+
+    private void reportReturnValueBug(JavaClass jc, Method m, SourceLineAnnotation sla) {
+        if (!methodsToReport.isEmpty() && currentLockField == null) {
+            bugReporter.reportBug(
+                    new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE", NORMAL_PRIORITY)
+                            .addClassAndMethod(jc, m).addCalledMethod(returnMethodUsedAsLock).addSourceLine(sla));
+        }
+    }
+
+    private void reportLocalVarBug(JavaClass jc, Method m, SourceLineAnnotation sla) {
+        if (!methodsLocalVarReport.isEmpty()) {
+            if (localVariableAnnotationsMap.containsKey(m)) {
+                bugReporter.reportBug(
+                        new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
+                                .addClassAndMethod(jc, m).add(localVariableAnnotationsMap.get(m)).addSourceLine(sla));
             }
         }
     }
 
     @Override
     public void visitAfter(JavaClass jc) {
-        if (currentLockField != null && !unsynchronizedMethods.isEmpty()) {
-            for (Method method : methodsToReport) {
-                bugReporter.reportBug(new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
-                        .addClass(jc).addMethod(jc, method).addField(currentLockField));
-            }
-        }
-        if (!methodsToReport.isEmpty() && currentLockField == null) {
-            for (Method method : methodsToReport) {
-                bugReporter.reportBug(
-                        new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE", NORMAL_PRIORITY)
-                                .addClass(jc).addMethod(jc, method).addMethod(methodToAdd));
-            }
-        }
-
-        if (!methodsLocalVarReport.isEmpty()) {
-            for (Method method : methodsLocalVarReport) {
-                if (localVariableAnnotationsMap.containsKey(method)) {
-                    bugReporter.reportBug(
-                            new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE", NORMAL_PRIORITY)
-                                    .addClass(jc).addMethod(jc, method).add(localVariableAnnotationsMap.get(method)));
-                }
-            }
-        }
-
         methodsToReport.clear();
         methodsLocalVarReport.clear();
         unsynchronizedMethods.clear();
         super.visitAfter(jc);
     }
-
 
     private LocalVariable getLockVariableFromStack(OpcodeStack stack) {
         if (stack.getStackDepth() <= 0) {
@@ -209,7 +206,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
 
         int localVarIndex = topItem.getRegisterNumber();
-        LocalVariableTable localVariableTable = getLocalVariableTableFromMethod();
+        LocalVariableTable localVariableTable = getLocalVariableTableOfMethod();
         if (localVariableTable == null || localVarIndex < 0) {
             return null;
         }
@@ -232,22 +229,21 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         try {
             JavaClass[] allSuperclasses = javaClass.getSuperClasses();
             if (allSuperclasses != null) {
-                JavaClassAndMethod match = Hierarchy.findMethod(allSuperclasses, method.getName(), method.getSignature(),
-                        Hierarchy.INSTANCE_METHOD);
+                JavaClassAndMethod match = Hierarchy.findMethod(allSuperclasses, method.getName(), method.getSignature(), Hierarchy.INSTANCE_METHOD);
                 if (match != null) {
                     return true;
                 }
             }
             JavaClass[] allInterfaces = javaClass.getAllInterfaces();
             if (allInterfaces != null) {
-                JavaClassAndMethod match = Hierarchy.findMethod(allInterfaces, method.getName(), method.getSignature(),
-                        Hierarchy.INSTANCE_METHOD);
+                JavaClassAndMethod match = Hierarchy.findMethod(allInterfaces, method.getName(), method.getSignature(), Hierarchy.INSTANCE_METHOD);
                 if (match != null) {
                     return true;
                 }
             }
             return false;
         } catch (ClassNotFoundException e) {
+            AnalysisContext.reportMissingClass(e);
             return true;
         }
     }

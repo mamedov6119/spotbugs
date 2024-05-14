@@ -17,6 +17,7 @@ public class BadClientSideLockingBook3 {
     }
 
     public Calendar getDueDate() {
+        int i = 0 ;
         return book.getDueDate();
     }
 
