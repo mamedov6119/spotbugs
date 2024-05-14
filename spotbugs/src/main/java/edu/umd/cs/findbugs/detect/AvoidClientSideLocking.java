@@ -158,7 +158,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     }
 
     private void reportClassFieldBug(JavaClass jc, Method m, SourceLineAnnotation sla) {
-        if (currentLockField != null && !unsynchronizedMethods.isEmpty()) {
+        if (currentLockField != null && !unsynchronizedMethods.isEmpty() && methodsToReport.contains(m)) {
             bugReporter.reportBug(
                     new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
                             .addClassAndMethod(jc, m).addField(currentLockField).addSourceLine(sla));
