@@ -95,7 +95,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                             getMethod(), stack.getStackItem(0), getPC());
                     if (localVariableAnnotation != null) {
                         localVariableAnnotationsMap.put(getMethod(), localVariableAnnotation);
-                        System.out.println("Annotation: " + localVariableAnnotation.getName() + " " + getMethod());
                     }
                 }
             }
