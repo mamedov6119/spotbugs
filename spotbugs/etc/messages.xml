@@ -9279,7 +9279,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1} the method {2} utilizes client-side locking on the field {3}, it is advised to avoid this practice.</LongDescription>
+    <LongDescription>In class {0} the method {1} utilizes client-side locking on the field {2}, it is advised to avoid this practice.</LongDescription>
     <Details>
         <![CDATA[
             <p>
@@ -9303,7 +9303,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1} the method {2} utilizes client-side locking on a return value of {3}, it is advised to avoid this practice.</LongDescription>
+    <LongDescription>In class {0} the method {1} utilizes client-side locking on a return value of {2}, it is advised to avoid this practice.</LongDescription>
     <Details>
         <![CDATA[
             <p>
@@ -9327,7 +9327,7 @@ Using floating-point variables should not be used as loop counters, as they are 
   </BugPattern>
   <BugPattern type="ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_LOCAL_VARIABLE">
     <ShortDescription>Avoid client-side locking when using classes without explicit locking strategy</ShortDescription>
-    <LongDescription>In class {1} the method {2} utilizes client-side locking on the local variable {3}, it is advised to avoid this practice.</LongDescription>
+    <LongDescription>In class {0} the method {1} utilizes client-side locking on the local variable {2}, it is advised to avoid this practice.</LongDescription>
     <Details>
         <![CDATA[
             <p>
