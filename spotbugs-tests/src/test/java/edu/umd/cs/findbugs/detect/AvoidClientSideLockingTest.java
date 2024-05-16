@@ -109,6 +109,15 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void testBadMapClass2() {
+        performAnalysis("avoidClientSideLocking/TestCodeChecker.class");
+        // assertReturnValueBug("updateAndPrintData", "DataUpdater", 21, "updateAndPrintData");
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+    }
+
+    @Test
     void testGoodLocking() {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
                 "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",
