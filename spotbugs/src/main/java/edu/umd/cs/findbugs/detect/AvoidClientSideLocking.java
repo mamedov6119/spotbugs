@@ -182,9 +182,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
 
     @Override
     public void visitAfter(JavaClass jc) {
-        unsynchronizedMethods.clear();
+        isFirstVisit = false;
+        currentPackageName = null;
         currentLockField = null;
         returnMethodUsedAsLock = null;
+        unsynchronizedMethods.clear();
         localVariableAnnotationsMap.clear();
         super.visitAfter(jc);
     }
