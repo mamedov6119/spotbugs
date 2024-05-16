@@ -119,10 +119,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             if (!Const.CONSTRUCTOR_NAME.equals(getMethodName()) && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
-                    if ((xfield.equals(currentLockField) && unsynchronizedMethods.contains(getMethod())) || (xfield.isStatic() && currentPackageName
-                            .equals(xfield.getPackageName()) && unsynchronizedMethods.contains(getMethod()))) {
-                        reportClassFieldBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this,
-                                getPC()));
+                    if ((xfield.equals(currentLockField) && unsynchronizedMethods.contains(getMethod())) || (xfield.isStatic() && currentPackageName.equals(xfield.getPackageName()) && unsynchronizedMethods.contains(getMethod()))) {
+                        reportClassFieldBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this, getPC()));
                     }
 
                 }
@@ -148,8 +146,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             }
             if (stack.getStackDepth() > 0) {
                 XMethod methodC = stack.getStackItem(0).getReturnValueOf();
-                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName())
-                        && overridesSuperclassMethod(getThisClass(), methodC)) {
+                if (methodC != null && !Const.CONSTRUCTOR_NAME.equals(methodC.getName()) && !Const.STATIC_INITIALIZER_NAME.equals(methodC.getName()) && overridesSuperclassMethod(getThisClass(), methodC)) {
                     returnMethodUsedAsLock = methodC;
                     reportReturnValueBug(getThisClass(), getMethod(), SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this, getPC()));
                 }
@@ -233,7 +230,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 "synchronizedNavigableSet", "synchronizedList", "synchronizedMap",
                 "synchronizedSortedMap", "synchronizedNavigableMap"));
         return ("java.util.Collections".equals(classMember.getClassName()) && interestingCollectionMethodNames.contains(classMember.getName()))
-                || (classMember.getClassName().startsWith("java.util.concurrent.atomic") && classMember.getSignature().endsWith(")V") || (classMember.getClassName().startsWith("java.util.concurrent")));
+                || classMember.getSignature().endsWith(")V") || (classMember.getClassName().startsWith("java.util.concurrent"));
     }
 
     // Reference to the original method. Link:
