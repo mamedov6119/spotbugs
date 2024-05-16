@@ -233,7 +233,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 "synchronizedNavigableSet", "synchronizedList", "synchronizedMap",
                 "synchronizedSortedMap", "synchronizedNavigableMap"));
         return ("java.util.Collections".equals(classMember.getClassName()) && interestingCollectionMethodNames.contains(classMember.getName()))
-                || (classMember.getClassName().startsWith("java.util.concurrent.atomic") && classMember.getSignature().endsWith(")V"));
+                || (classMember.getClassName().startsWith("java.util.concurrent.atomic") && classMember.getSignature().endsWith(")V") || (classMember.getClassName().startsWith("java.util.concurrent")));
     }
 
     // Reference to the original method. Link:
