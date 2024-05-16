@@ -18,6 +18,7 @@
 
 package edu.umd.cs.findbugs.detect;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,6 +37,7 @@ import edu.umd.cs.findbugs.OpcodeStack;
 import edu.umd.cs.findbugs.SourceLineAnnotation;
 import edu.umd.cs.findbugs.OpcodeStack.Item;
 import edu.umd.cs.findbugs.ba.AnalysisContext;
+import edu.umd.cs.findbugs.ba.ClassMember;
 import edu.umd.cs.findbugs.ba.Hierarchy;
 import edu.umd.cs.findbugs.ba.JavaClassAndMethod;
 import edu.umd.cs.findbugs.ba.XField;
@@ -85,8 +87,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     Item topItem = stack.getStackItem(0);
                     if (topItem.getXField() != null) {
                         XField xfield = topItem.getXField();
-                        if (xfield.getClassName().equals(getThisClass().getClassName())) {
-                            System.out.println("xfield: " + xfield.getClassName() + " this class: " + getThisClass());
+                        if (xfield.getClassName().equals(getThisClass().getClassName()) && !isThreadSafeField(xfield)) {
                             currentLockField = xfield;
                         }
                     }
@@ -157,7 +158,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     }
 
     private void reportClassFieldBug(JavaClass jc, Method m, SourceLineAnnotation sla) {
-        if (currentLockField != null && !unsynchronizedMethods.isEmpty()) {
+        if (currentLockField != null && unsynchronizedMethods.contains(m)) {
             bugReporter.reportBug(
                     new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_FIELD", NORMAL_PRIORITY)
                             .addClassAndMethod(jc, m).addField(currentLockField).addSourceLine(sla));
@@ -218,6 +219,21 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
         }
 
         return null;
+    }
+
+
+    // Reference to the original method. Link:
+    // https://gitlab.inf.elte.hu/java-static-analysis/spotbugs/-/merge_requests/20/diffs#66a21fadeee4760e4e500b0a7becbbce65e3af18
+    private static boolean isThreadSafeField(ClassMember classMember) {
+        if (classMember == null) {
+            return false;
+        }
+        Set<String> interestingCollectionMethodNames = new HashSet<>(Arrays.asList(
+                "synchronizedCollection", "synchronizedSet", "synchronizedSortedSet",
+                "synchronizedNavigableSet", "synchronizedList", "synchronizedMap",
+                "synchronizedSortedMap", "synchronizedNavigableMap"));
+        return ("java.util.Collections".equals(classMember.getClassName()) && interestingCollectionMethodNames.contains(classMember.getName()))
+                || (classMember.getClassName().startsWith("java.util.concurrent.atomic") && classMember.getSignature().endsWith(")V"));
     }
 
     // Reference to the original method. Link:
