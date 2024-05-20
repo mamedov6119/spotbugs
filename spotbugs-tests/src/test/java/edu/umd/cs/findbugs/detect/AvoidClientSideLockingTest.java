@@ -110,27 +110,47 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
 
     @Test
     void testBadMapClass2() {
-        performAnalysis("avoidClientSideLocking/TestCodeChecker.class");
-        // assertReturnValueBug("updateAndPrintData", "DataUpdater", 21, "updateAndPrintData");
-        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        performAnalysis("avoidClientSideLocking/BadClientSideLockingMap2.class",
+                "avoidClientSideLocking/DataUpdaterUsingInterface.class", "avoidClientSideLocking/DataContainer.class");
+        assertReturnValueBug("updateAndPrintData", "DataUpdaterUsingInterface", 34, "updateAndPrintData");
+        assertNumOfACSLBugs(ACSL_RETURN, 1);
         assertNumOfACSLBugs(ACSL_LOCAL, 0);
         assertNumOfACSLBugs(ACSL_FIELD, 0);
     }
+
+    @Test
+    void testBadMapClass3() {
+        performAnalysis("avoidClientSideLocking/BadSynchDataStructures1.class");
+        assertFieldBug("updateAndPrintData4", "BadSynchDataStructures1", 44, "list");
+        assertNumOfACSLBugs(ACSL_FIELD, 1);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
+    }
+
+    @Test
+    void testBadRepository1() {
+        performAnalysis("avoidClientSideLocking/BadRepository1.class", "avoidClientSideLocking/BadRepository1$1.class",
+                "avoidClientSideLocking/BadRepository1$RepositoryDateFormat.class");
+        assertReturnValueBug("parse", "BadRepository1", 14, "parse");
+        assertNumOfACSLBugs(ACSL_RETURN, 1);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
+        assertNumOfACSLBugs(ACSL_FIELD, 0);
+    }
+
 
     @Test
     void testGoodLocking() {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
                 "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",
                 "avoidClientSideLocking/GoodClientSideLockingIP1.class", "avoidClientSideLocking/IPAddressList.class",
-                "avoidClientSideLocking/GoodRepository1.class", "avoidClientSideLocking/GoodRepository1$1.class",
-                "avoidClientSideLocking/GoodRepository1$RepositoryDateFormat.class",
-                "avoidClientSideLocking/GoodClientSideLockingMap1.class");
+                "avoidClientSideLocking/GoodClientSideLockingMap1.class", "avoidClientSideLocking/GoodSynchDataStructures.class");
         assertZeroACSLBugs();
     }
 
     private void assertReturnValueBug(String method, String className, int line, String methodName) {
         final BugInstanceMatcher bugInstanceMatcher = new BugInstanceMatcherBuilder()
                 .bugType(ACSL_RETURN).inClass(className).inMethod(method).inMethod(methodName).atLine(line).build();
+        // How do I the called method name? like it happens in X method and Y is the method used as a lock in synch block.
         assertThat(getBugCollection(), hasItem(bugInstanceMatcher));
     }
 
