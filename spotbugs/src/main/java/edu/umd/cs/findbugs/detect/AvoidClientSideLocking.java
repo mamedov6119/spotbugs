@@ -90,12 +90,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     XField xfield = getXFieldOperand();
                     if (xfield != null) {
                         Item value = stack.getStackItem(0);
-                        if (value.getReturnValueOf() != null) {
-                        }
                         if (value != null
                                 && (value.getSignature() != null && isThreadSafeField(value.getSignature()) || value
                                         .getReturnValueOf() != null
                                         && isThreadSafeField(value.getReturnValueOf().getName()))) {
+                            System.out.println("Thread safe field: " + xfield.getName());
                             threadSafeFields.add(xfield);
                         }
                     }
@@ -144,10 +143,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     && !Const.STATIC_INITIALIZER_NAME.equals(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
-                    if (((xfield.equals(currentLockField) && unsynchronizedMethods.contains(getMethod()))
-                            || (xfield.isStatic() && currentPackageName
-                                    .equals(xfield.getPackageName()) && unsynchronizedMethods.contains(getMethod())))
-                            && !threadSafeFields.contains(xfield)) {
+                    if (unsynchronizedMethods.contains(getMethod()) && !threadSafeFields.contains(xfield)
+                            && currentPackageName.equals(xfield.getPackageName())) {
                         reportClassFieldBug(getThisClass(), getMethod(),
                                 SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this,
                                         getPC()));

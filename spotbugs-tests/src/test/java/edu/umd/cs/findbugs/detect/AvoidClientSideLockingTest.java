@@ -137,6 +137,17 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertNumOfACSLBugs(ACSL_FIELD, 0);
     }
 
+    @Test
+    void testGoodCodeCheckerPieces() {
+        performAnalysis("avoidClientSideLocking/SharedResource.class", "avoidClientSideLocking/Piece.class");
+        assertZeroACSLBugs();
+    }
+
+    // @Test
+    // void testGoodCodeCheckerSocket() {
+    //     performAnalysis("avoidClientSideLocking/SocketChannelHandler.class");
+    //     assertZeroACSLBugs();
+    // }
 
     @Test
     void testGoodLocking() {
