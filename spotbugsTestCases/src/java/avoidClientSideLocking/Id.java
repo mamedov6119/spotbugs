@@ -18,7 +18,6 @@ public abstract class Id<T> implements Comparable<Id<T>> {
         ConcurrentMap<String, Id<?>> mapId = cacheId.computeIfAbsent(type, k -> new ConcurrentHashMap<>(1000));
 
         Id<?> id = mapId.get(key);
-        // Double-Checked Locking with client-side locking on mapId
         synchronized (mapId) {
             id = mapId.get(key);
             if (id == null) {

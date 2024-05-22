@@ -128,12 +128,6 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGoodMapClass4() {
-        performAnalysis("avoidClientSideLocking/Id.class", "avoidClientSideLocking/Id$IdImpl.class");
-        assertZeroACSLBugs();
-    }
-
-    @Test
     void testBadRepository1() {
         performAnalysis("avoidClientSideLocking/BadRepository1.class", "avoidClientSideLocking/BadRepository1$1.class",
                 "avoidClientSideLocking/BadRepository1$RepositoryDateFormat.class");
@@ -141,6 +135,18 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertNumOfACSLBugs(ACSL_RETURN, 1);
         assertNumOfACSLBugs(ACSL_LOCAL, 0);
         assertNumOfACSLBugs(ACSL_FIELD, 0);
+    }
+
+    @Test
+    void testGoodMapClass4() {
+        performAnalysis("avoidClientSideLocking/Id.class", "avoidClientSideLocking/Id$IdImpl.class");
+        assertZeroACSLBugs();
+    }
+
+    @Test
+    void GoodFloatingVehicle5() {
+        performAnalysis("avoidClientSideLocking/FreeFloatingVehiclesContainer.class");
+        assertZeroACSLBugs();
     }
 
     @Test

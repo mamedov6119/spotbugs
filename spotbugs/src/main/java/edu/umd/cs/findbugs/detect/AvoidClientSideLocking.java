@@ -83,10 +83,11 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                     Item value = stack.getStackItem(0);
                     XMethod returnValueOf = value.getReturnValueOf();
                     boolean isSignatureThreadSafe = value.getSignature() != null
-                            && (isThreadSafeField(value.getSignature()) || value.getSignature().contains("java/lang/Object"));
+                            && (isThreadSafeField(value.getSignature()));
                     boolean isReturnValueThreadSafe = returnValueOf != null
                             && isThreadSafeField(returnValueOf.getName());
-                    if (isSignatureThreadSafe || isReturnValueThreadSafe) {
+                    boolean isFinalObject = value.getSignature().contains("java/lang/Object") && xfield.isFinal();
+                    if (isSignatureThreadSafe || isReturnValueThreadSafe || isFinalObject) {
                         threadSafeFields.add(xfield);
                     }
                 }
@@ -132,11 +133,9 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
                     boolean isMethodUnsynchronized = unsynchronizedMethods.contains(getMethod());
-                    boolean isFieldNotNull = xfield != null;
-                    boolean isFieldNotThreadSafe = !threadSafeFields.contains(xfield);
-                    boolean isSamePackage = xfield != null && xfield.getPackageName() != null
-                            && xfield.getPackageName().equals(getThisClass().getPackageName());
-                    if (isMethodUnsynchronized && isFieldNotNull && isFieldNotThreadSafe && isSamePackage) {
+                    boolean isFieldNotNullAndSamePackage = xfield != null && xfield.getPackageName() != null && xfield.getPackageName().equals(getThisClass().getPackageName());
+                    boolean isFieldNotThreadSafeAndNotCurrent = currentLockField.equals(xfield) && !threadSafeFields.contains(xfield);
+                    if (isMethodUnsynchronized && isFieldNotNullAndSamePackage && isFieldNotThreadSafeAndNotCurrent) {
                         reportClassFieldBug(getThisClass(), getMethod(),
                                 SourceLineAnnotation.fromVisitedInstruction(getClassContext(), this,
                                         getPC()));
