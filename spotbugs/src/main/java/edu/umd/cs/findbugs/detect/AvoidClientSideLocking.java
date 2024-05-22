@@ -133,7 +133,8 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
                     boolean isMethodUnsynchronized = unsynchronizedMethods.contains(getMethod());
-                    boolean isFieldNotNullAndSamePackage = xfield != null && xfield.getPackageName() != null && xfield.getPackageName().equals(getThisClass().getPackageName());
+                    boolean isFieldNotNullAndSamePackage = xfield != null && xfield.getPackageName() != null && xfield.getPackageName().equals(
+                            getThisClass().getPackageName());
                     boolean isFieldNotThreadSafeAndNotCurrent = currentLockField.equals(xfield) && !threadSafeFields.contains(xfield);
                     if (isMethodUnsynchronized && isFieldNotNullAndSamePackage && isFieldNotThreadSafeAndNotCurrent) {
                         reportClassFieldBug(getThisClass(), getMethod(),
