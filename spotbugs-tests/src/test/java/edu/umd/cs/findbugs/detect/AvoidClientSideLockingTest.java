@@ -128,6 +128,12 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void testGoodMapClass4() {
+        performAnalysis("avoidClientSideLocking/Id.class", "avoidClientSideLocking/Id$IdImpl.class");
+        assertZeroACSLBugs();
+    }
+
+    @Test
     void testBadRepository1() {
         performAnalysis("avoidClientSideLocking/BadRepository1.class", "avoidClientSideLocking/BadRepository1$1.class",
                 "avoidClientSideLocking/BadRepository1$RepositoryDateFormat.class");
@@ -143,11 +149,11 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         assertZeroACSLBugs();
     }
 
-    // @Test
-    // void testGoodCodeCheckerSocket() {
-    //     performAnalysis("avoidClientSideLocking/SocketChannelHandler.class");
-    //     assertZeroACSLBugs();
-    // }
+    @Test
+    void testGoodCodeCheckerSocket() {
+        performAnalysis("avoidClientSideLocking/SocketChannelHandler.class");
+        assertZeroACSLBugs();
+    }
 
     @Test
     void testGoodLocking() {
