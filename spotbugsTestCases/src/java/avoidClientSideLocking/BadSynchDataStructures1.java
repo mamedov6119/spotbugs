@@ -13,6 +13,8 @@ public class BadSynchDataStructures1 {
     private final AtomicInteger atomicInt;
     private Map<Integer, String> synchMap;
     private List<Integer> list;
+    private final Object lock = new Object();
+    private Object lock2 = new Object();
     
     public BadSynchDataStructures1() {
         this.map = new ConcurrentHashMap<>();

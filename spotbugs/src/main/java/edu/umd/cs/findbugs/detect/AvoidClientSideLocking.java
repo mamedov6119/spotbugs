@@ -86,8 +86,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
                             && (isThreadSafeField(value.getSignature()));
                     boolean isReturnValueThreadSafe = returnValueOf != null
                             && isThreadSafeField(returnValueOf.getName());
-                    boolean isFinalObject = value.getSignature().contains("java/lang/Object") && xfield.isFinal();
-                    if (isSignatureThreadSafe || isReturnValueThreadSafe || isFinalObject) {
+                    if (isSignatureThreadSafe || isReturnValueThreadSafe || xfield.isFinal()) {
                         threadSafeFields.add(xfield);
                     }
                 }
@@ -128,7 +127,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
          * Then check if the field is not thread safe and if the method is not
          * synchronized. If so, report a bug.
          */
-        if (seen == Const.PUTFIELD || seen == Const.GETFIELD || seen == Const.GETSTATIC || seen == Const.PUTSTATIC) {
+        if (seen == Const.PUTFIELD || seen == Const.PUTSTATIC || seen == Const.GETFIELD || seen == Const.GETSTATIC) {
             if (isNotConstructorOrStaticInitializer(getMethodName())) {
                 if (getXFieldOperand() != null && currentLockField != null) {
                     XField xfield = getXFieldOperand();
@@ -333,7 +332,6 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
             bugReporter.reportBug(
                     new BugInstance(this, "ACSL_AVOID_CLIENT_SIDE_LOCKING_ON_RETURN_VALUE", NORMAL_PRIORITY)
                             .addClassAndMethod(jc, m).addCalledMethod(returnMethodUsedAsLock).addSourceLine(sla));
-            // How to access the method passed to addCalledMethod in the Tests?
         }
     }
 

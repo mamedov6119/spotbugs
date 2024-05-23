@@ -1,13 +1,11 @@
 package edu.umd.cs.findbugs.detect;
 
-import static edu.umd.cs.findbugs.test.CountMatcher.containsExactly;
-import static org.hamcrest.Matchers.hasItem;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-
+import static org.hamcrest.Matchers.hasItem;
 import org.junit.jupiter.api.Test;
 
 import edu.umd.cs.findbugs.AbstractIntegrationTest;
+import static edu.umd.cs.findbugs.test.CountMatcher.containsExactly;
 import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcher;
 import edu.umd.cs.findbugs.test.matcher.BugInstanceMatcherBuilder;
 
@@ -119,9 +117,9 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testBadMapClass3() {
+    void testBadBadSynchDataStructures1() {
         performAnalysis("avoidClientSideLocking/BadSynchDataStructures1.class");
-        assertFieldBug("updateAndPrintData4", "BadSynchDataStructures1", 44, "list");
+        assertFieldBug("updateAndPrintData4", "BadSynchDataStructures1", 46, "list");
         assertNumOfACSLBugs(ACSL_FIELD, 1);
         assertNumOfACSLBugs(ACSL_RETURN, 0);
         assertNumOfACSLBugs(ACSL_LOCAL, 0);
@@ -138,27 +136,22 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGoodMapClass4() {
-        performAnalysis("avoidClientSideLocking/Id.class", "avoidClientSideLocking/Id$IdImpl.class");
-        assertZeroACSLBugs();
+    void testBadSharedTorrent1() {
+        performAnalysis("avoidClientSideLocking/SharedResource.class",
+                "avoidClientSideLocking/Piece.class");
+        assertFieldBug("closeFileChannelIfNecessary", "SharedResource", 27, "pieces");
+        assertNumOfACSLBugs(ACSL_FIELD, 1);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
-    void GoodFloatingVehicle5() {
+    void testFreeFloatingVehiclesContainer1() {
         performAnalysis("avoidClientSideLocking/FreeFloatingVehiclesContainer.class");
-        assertZeroACSLBugs();
-    }
-
-    @Test
-    void testGoodCodeCheckerPieces() {
-        performAnalysis("avoidClientSideLocking/SharedResource.class", "avoidClientSideLocking/Piece.class");
-        assertZeroACSLBugs();
-    }
-
-    @Test
-    void testGoodCodeCheckerSocket() {
-        performAnalysis("avoidClientSideLocking/SocketChannelHandler.class");
-        assertZeroACSLBugs();
+        assertFieldBug("getFfVehicleLocationQuadTree", "FreeFloatingVehiclesContainer", 29, "availableFFVehicleLocationQuadTree");
+        assertNumOfACSLBugs(ACSL_FIELD, 1);
+        assertNumOfACSLBugs(ACSL_RETURN, 0);
+        assertNumOfACSLBugs(ACSL_LOCAL, 0);
     }
 
     @Test
@@ -166,14 +159,14 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
                 "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",
                 "avoidClientSideLocking/GoodClientSideLockingIP1.class", "avoidClientSideLocking/IPAddressList.class",
-                "avoidClientSideLocking/GoodClientSideLockingMap1.class", "avoidClientSideLocking/GoodSynchDataStructures.class");
+                "avoidClientSideLocking/GoodClientSideLockingMap1.class", "avoidClientSideLocking/GoodSynchDataStructures.class",
+                "avoidClientSideLocking/Id.class", "avoidClientSideLocking/Id$IdImpl.class", "avoidClientSideLocking/SocketChannelHandler.class");
         assertZeroACSLBugs();
     }
 
     private void assertReturnValueBug(String method, String className, int line, String methodName) {
         final BugInstanceMatcher bugInstanceMatcher = new BugInstanceMatcherBuilder()
                 .bugType(ACSL_RETURN).inClass(className).inMethod(method).inMethod(methodName).atLine(line).build();
-        // How do I the called method name? like it happens in X method and Y is the method used as a lock in synch block.
         assertThat(getBugCollection(), hasItem(bugInstanceMatcher));
     }
 

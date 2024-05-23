@@ -25,6 +25,10 @@ public class FreeFloatingVehiclesContainer {
         }
     }
 
+    public Object getFfVehicleLocationQuadTree() {
+		return availableFFVehicleLocationQuadTree;
+	}
+
     public static void main(String[] args) {
         Object quadTree = new Object();
         FreeFloatingVehiclesContainer container = new FreeFloatingVehiclesContainer(quadTree);

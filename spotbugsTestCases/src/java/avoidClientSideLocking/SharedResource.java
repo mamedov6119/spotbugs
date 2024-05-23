@@ -23,7 +23,7 @@ public class SharedResource {
         this.requestedPieces = new BitSet();
     }
 
-    public synchronized void closeFileChannelIfNecessary() {
+    public void closeFileChannelIfNecessary() {
         if (isFileChannelOpen && pieces.length == 0) {
             isFileChannelOpen = false;
         }
