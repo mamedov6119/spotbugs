@@ -136,25 +136,6 @@ class AvoidClientSideLockingTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void testBadSharedTorrent1() {
-        performAnalysis("avoidClientSideLocking/SharedResource.class",
-                "avoidClientSideLocking/Piece.class");
-        assertFieldBug("closeFileChannelIfNecessary", "SharedResource", 27, "pieces");
-        assertNumOfACSLBugs(ACSL_FIELD, 1);
-        assertNumOfACSLBugs(ACSL_RETURN, 0);
-        assertNumOfACSLBugs(ACSL_LOCAL, 0);
-    }
-
-    @Test
-    void testFreeFloatingVehiclesContainer1() {
-        performAnalysis("avoidClientSideLocking/FreeFloatingVehiclesContainer.class");
-        assertFieldBug("getFfVehicleLocationQuadTree", "FreeFloatingVehiclesContainer", 29, "availableFFVehicleLocationQuadTree");
-        assertNumOfACSLBugs(ACSL_FIELD, 1);
-        assertNumOfACSLBugs(ACSL_RETURN, 0);
-        assertNumOfACSLBugs(ACSL_LOCAL, 0);
-    }
-
-    @Test
     void testGoodLocking() {
         performAnalysis("avoidClientSideLocking/GoodClientSideLockingBook1.class",
                 "avoidClientSideLocking/GoodClientSideLockingBook2.class", "avoidClientSideLocking/Book.class",

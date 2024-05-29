@@ -56,7 +56,7 @@ public class AvoidClientSideLocking extends OpcodeStackDetector {
     }
 
     /*
-     * Visit the class and its methods. If the method is not synchronized, visit it.
+     * Visit the class and its methods. If the method is not synchronized, save it.
      */
     @Override
     public void visit(JavaClass jc) {
